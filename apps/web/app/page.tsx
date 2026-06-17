@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { Navbar } from "../components/home/Navbar";
 
 
 export default function Home() {
@@ -13,7 +14,7 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen flex flex-col bg-light-bg dark:bg-dark-bg transition-colors duration-300 font-sans">
-   
+      <Navbar />
       
       <main className="flex-1 flex flex-col items-center justify-center p-8 text-light-text dark:text-dark-text gap-8">
         <div className="max-w-2xl text-center space-y-6">

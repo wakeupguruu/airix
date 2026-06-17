@@ -15,7 +15,7 @@ It is connected to the remote repository: `https://github.com/wakeupguruu/airix.
 
 ---
 
-## 🛠️ Commands Reference
+## Commands Reference
 
 Run these commands from the root directory:
 
@@ -28,7 +28,7 @@ Run these commands from the root directory:
 
 ---
 
-## 📋 Coding Conventions & Guidelines
+## Coding Conventions & Guidelines
 
 ### 1. Type Safety
 - TypeScript is strictly required. Never use `any` unless absolutely necessary and documented.
@@ -46,7 +46,7 @@ Run these commands from the root directory:
 
 ---
 
-## 🌿 Git & Commit Guidelines
+## Git & Commit Guidelines
 
 - **Narrative Commit Style**: Follow Conventional Commits format (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`).
 - **Commit Atomicity**: Keep commits small and logical. Do not squash unrelated changes.

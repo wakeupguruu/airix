@@ -1,26 +1,67 @@
 @import "tailwindcss";
 @import "@repo/tailwind-config";
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+/* Enable class-based dark mode in Tailwind v4 */
+@custom-variant dark (&:is(.dark *));
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+@theme {
+  /* Using exact hex codes here forces Tailwind IntelliSense to show the color preview autocomplete box! */
+  
+  /* Backgrounds */
+  --color-light-bg: #faf9f5;
+  --color-dark-bg: #0C0C0E;
+
+  /* Surfaces/Cards */
+  --color-light-surface: #efe9de;
+  --color-dark-surface: #161618;
+
+  /* Primary Brand Colors */
+  --color-light-primary: #cc785c;
+  --color-dark-primary: #cc785c;
+  
+  /* Button States */
+  --color-light-primary-active: #a85b42;
+  --color-dark-primary-active: #a85b42;
+  
+  --color-light-primary-disabled: #e6dfd8;
+  --color-dark-primary-disabled: #161618;
+  
+  --color-light-secondary-border: #f0ece7;
+  --color-dark-secondary-border: #2a2a2b;
+  
+  --color-button-dark-bg: #252320;
+  --color-button-dark-hover: #322f2b;
+
+  /* Text Colors */
+  --color-light-text: #141413;
+  --color-dark-text: #faf9f5;
+  
+  --color-light-muted: #6c6a64;
+  --color-dark-muted: #a09d96;
+
+  /* Borders */
+  --color-light-border: #e6dfd8;
+  --color-dark-border: #2a2a2b;
+
+  /* Typography */
+  --font-garamond-dark: var(--font-eb-garamond-dark), Georgia, serif;
+  --font-garamond-light: var(--font-eb-garamond-light), Georgia, serif;
+  --font-inter-regular: var(--font-inter-regular), system-ui, sans-serif;
+  --font-inter-bold: var(--font-inter-bold), system-ui, sans-serif;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: var(--font-inter-regular);
+  background-color: var(--color-light-bg);
+  color: var(--color-light-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: var(--color-dark-bg);
+  color: var(--color-dark-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-garamond-dark);
 }

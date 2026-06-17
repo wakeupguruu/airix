@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+echo "==> Running pre-commit validation checks..."
+
+# Check TypeScript compilations
+echo "--- TypeScript check-types"
+if ! pnpm run check-types; then
+    echo "FAIL: TypeScript compilation errors found. Please resolve before committing."
+    exit 1
+fi
+
+# Check Linting
+echo "--- ESLint checks"
+if ! pnpm run lint; then
+    echo "FAIL: Linting errors found. Please run 'pnpm run lint' and resolve issues before committing."
+    exit 1
+fi
+
+echo "Pre-commit checks passed successfully."
+exit 0

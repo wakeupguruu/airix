@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+echo "==> Running pre-push build validation checks..."
+
+# Check full Turborepo build
+echo "--- Turborepo production build"
+if ! pnpm run build; then
+    echo "FAIL: Monorepo production build failed. Please fix before pushing."
+    exit 1
+fi
+
+echo "Pre-push build check passed successfully."
+exit 0

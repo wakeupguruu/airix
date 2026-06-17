@@ -1,4 +1,4 @@
-"use client"
+import { Scene } from "../3d/home/Scene"
 
 export function HeroSection() {
     return (
@@ -18,21 +18,20 @@ export function HeroSection() {
                         </div>
                     </div>
 
-                    {/* Stage & 3D Container */}
+                    
                     <div className="w-full flex-grow flex justify-center items-end relative z-20 pointer-events-none">
                         
-                        {/* 3D Model (Removed) */}
+                       
                         <div className="absolute inset-y-0 -left-6 -right-6 md:-left-8 md:-right-8 z-10 pointer-events-auto">
-                            {/* Scene placeholder */}
+                            <Scene />
                         </div>
 
-                        {/* Stage */}
                         <div className="w-full h-[25%] flex justify-center items-center absolute bottom-0 left-0">
                             
-                            {/* Back Half */}
+                         
                             <div className="absolute w-[90%] max-w-5xl h-[140px] rounded-[50%] border border-light-border dark:border-dark-border border-b-transparent dark:border-b-transparent z-0"></div>
 
-                            {/* Front Half */}
+                        
                             <div className="absolute w-[90%] max-w-5xl h-[140px] rounded-[50%] border border-light-border dark:border-dark-border border-t-transparent dark:border-t-transparent flex justify-center items-end pointer-events-none z-20">
                                 {/* 360 Control Button */}
                                 <button className="absolute bottom-0 translate-y-1/2 w-12 h-12 rounded-full bg-light-bg dark:bg-dark-bg border border-light-border dark:border-dark-border flex items-center justify-between px-3 text-light-text dark:text-dark-text pointer-events-auto z-30">

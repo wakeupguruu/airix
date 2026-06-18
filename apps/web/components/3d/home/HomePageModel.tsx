@@ -7,7 +7,7 @@ import { useThree } from '@react-three/fiber'
 
 export function HomePageModel(props: any){
 
-    const { scene } = useGLTF('/models/f-22_raptor_optimized.glb')
+    const { scene } = useGLTF('/models/f-22_raptor_draco.glb')
     const modelRef = useRef<THREE.Group>(null)
 
     // Finalized Coordinates
@@ -107,4 +107,4 @@ export function HomePageModel(props: any){
     )
 }
 
-useGLTF.preload('/models/f-22_raptor_optimized.glb')
+useGLTF.preload('/models/f-22_raptor_draco.glb')

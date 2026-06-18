@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 
 export function FeaturesModel(props: any) {
-    const { scene } = useGLTF('/models/Jet_Turbine_optimized.glb')
+    const { scene } = useGLTF('/models/Jet_Turbine_draco.glb')
     const modelRef = useRef<THREE.Group>(null)
 
     // Finalized production values
@@ -58,4 +58,4 @@ export function FeaturesModel(props: any) {
 }
 
 // Preload the model
-useGLTF.preload('/models/Jet_Turbine_optimized.glb')
+useGLTF.preload('/models/Jet_Turbine_draco.glb')

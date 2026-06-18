@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Navbar } from "../components/home/Navbar";
 import { HeroSection } from "../components/home/HeroSection";
 import { FeaturesSection } from "../components/home/FeaturesSection";
-
+import { BenefitsSection } from "../components/home/BenefitsSection";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -19,6 +19,7 @@ export default function Home() {
       <Navbar />
       <HeroSection/>
       <FeaturesSection />
+      <BenefitsSection />
     </div>
   );
 }

@@ -96,3 +96,5 @@ export function HomePageModel(props: any){
         </group>
     )
 }
+
+useGLTF.preload('/models/f-22_raptor.glb')

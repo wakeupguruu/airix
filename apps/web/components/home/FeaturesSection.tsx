@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { FeaturesScene } from "../3d/home/FeaturesScene";
 
 const FEATURES_DATA = [
   {
@@ -26,8 +27,8 @@ const FEATURES_DATA = [
 
 export function FeaturesSection() {
   return (
-    <section className="w-full py-12 lg:py-16 px-12 md:px-14 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text">
-      <div className="max-w-full mx-auto flex flex-col">
+    <section className="w-full py-12 lg:py-16 px-10 md:px-14 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text">
+      <div className="w-full flex flex-col">
         {/* Header */}
         <div className="mb-12">
           <div className="max-w-2xl">
@@ -66,12 +67,10 @@ export function FeaturesSection() {
                 </div>
 
                 {/* Coral Glow Center */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-light-primary rounded-full blur-3xl opacity-30"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-light-primary rounded-full blur-3xl opacity-20 z-0"></div>
 
-                {/* Wireframe rings */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-40 border border-white/10 rounded-[50%]"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-28 border border-light-primary/30 rounded-[50%]"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16 border border-white/15 rounded-[50%]"></div>
+                {/* 3D Wireframe Model */}
+                <FeaturesScene />
 
                 {/* Bottom HUD */}
                 <div className="absolute bottom-4 left-4 right-4">

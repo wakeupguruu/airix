@@ -1,28 +1,38 @@
-## Getting Started
+# Airix Web Application
 
-First, run the development server:
+This is the primary frontend application for **Airix**, an AI-powered platform for designing aircraft, fighter jets, and drones. 
+
+Built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, and **React Three Fiber**, it provides a premium, interactive 3D environment for aerospace design, physics analysis, and predictive maintenance.
+
+## Application Routes & Structure
+
+The application is organized into the following key pages:
+
+- `/` - **Home**: The landing page featuring an interactive 3D showroom and platform introduction.
+- `/pricing` - **Pricing**: Subscription tiers and access plans.
+- `/login` & `/register` - **Authentication**: User onboarding, login, and registration flows.
+- `/library` - **Project Library**: A dashboard listing all user workspaces and past designs.
+- `/workspace` - **Workspace Creation**: The entry point to start a new project. Users can choose to generate designs via Text-to-Image (pick 1 of 4 to generate a model), Text-to-Model, Image-to-Model, or start from a Blank canvas.
+- `/workspace/[project-id]` - **Active Workspace**: The core 3D modeling environment. Includes the **AI Physics Chatbot** which gathers requirements (like materials and engine specs) to calculate weight, cost, and real-world physics behavior.
+- `/maintenance` - **Predictive Maintenance**: A dashboard to track existing aircraft health. Users can upload sensor CSVs or enter data manually for AI-driven failure prediction and lifespan estimation.
+- `/profile` - **User Profile**: Manage personal information and account details.
+- `/settings` - **Settings**: Application preferences and configurations.
+
+## Tech Stack
+
+- **Framework**: Next.js (App Router)
+- **Styling**: Tailwind CSS v4 (configured with a warm cream/coral premium editorial theme)
+- **3D Rendering**: React Three Fiber, Drei, and Three.js
+- **Animations**: GSAP
+- **Theming**: `next-themes` for seamless Light/Dark mode transitions
+
+## Local Development
+
+To run this application locally, ensure you are in the root of the monorepo or within this directory, then execute:
 
 ```bash
-yarn dev
+# Start the Next.js development server
+pnpm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) with your browser to see the result.
-
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
-
-To create [API routes](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) add an `api/` directory to the `app/` directory with a `route.ts` file. For individual endpoints, create a subfolder in the `api` directory, like `api/hello/route.ts` would map to [http://localhost:3001/api/hello](http://localhost:3001/api/hello).
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn/foundations/about-nextjs) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_source=github.com&utm_medium=referral&utm_campaign=turborepo-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The application will start on port `3001`. Open [http://localhost:3001](http://localhost:3001) in your browser.

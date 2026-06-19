@@ -3,10 +3,11 @@ import { useGLTF, Center } from '@react-three/drei'
 import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
+import { useThree } from '@react-three/fiber'
 
 export function HomePageModel(props: any){
 
-    const { scene } = useGLTF('/models/f-22_raptor.glb')
+    const { scene } = useGLTF('/models/f-22_raptor_draco.glb')
     const modelRef = useRef<THREE.Group>(null)
 
     // Finalized Coordinates
@@ -51,6 +52,8 @@ export function HomePageModel(props: any){
         }, 1500)
     }
 
+    const { gl } = useThree()
+
     useEffect(() => {
         const handlePointerDown = (e: PointerEvent) => {
             isDragging.current = true
@@ -67,21 +70,28 @@ export function HomePageModel(props: any){
         }
 
         const handlePointerUp = () => {
-            isDragging.current = false
-            triggerInteraction()
+            if (isDragging.current) {
+                isDragging.current = false
+                triggerInteraction()
+            }
         }
 
-        window.addEventListener('pointerdown', handlePointerDown)
+        const canvas = gl.domElement
+        
+        // Only start drag if clicking inside the Hero canvas
+        canvas.addEventListener('pointerdown', handlePointerDown)
+        
+        // These can stay on window so dragging doesn't break if mouse leaves the canvas bounds
         window.addEventListener('pointermove', handlePointerMove)
         window.addEventListener('pointerup', handlePointerUp)
 
         return () => {
-            window.removeEventListener('pointerdown', handlePointerDown)
+            canvas.removeEventListener('pointerdown', handlePointerDown)
             window.removeEventListener('pointermove', handlePointerMove)
             window.removeEventListener('pointerup', handlePointerUp)
             if (timeoutRef.current) clearTimeout(timeoutRef.current)
         }
-    }, [])
+    }, [gl, triggerInteraction])
 
     return (
         <group 
@@ -96,3 +106,5 @@ export function HomePageModel(props: any){
         </group>
     )
 }
+
+useGLTF.preload('/models/f-22_raptor_draco.glb')

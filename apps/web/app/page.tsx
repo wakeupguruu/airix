@@ -5,7 +5,8 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Navbar } from "../components/home/Navbar";
 import { HeroSection } from "../components/home/HeroSection";
-
+import { FeaturesSection } from "../components/home/FeaturesSection";
+import { BenefitsSection } from "../components/home/BenefitsSection";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -17,6 +18,8 @@ export default function Home() {
     <div className="w-full min-h-screen flex flex-col bg-light-bg dark:bg-dark-bg transition-colors duration-300 font-sans">
       <Navbar />
       <HeroSection/>
+      <FeaturesSection />
+      <BenefitsSection />
     </div>
   );
 }

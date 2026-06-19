@@ -1,58 +1,44 @@
-# Turborepo Tailwind CSS starter
+# Airix
 
-This Turborepo starter is maintained by the Turborepo core team.
+Airix is a next-generation AI-powered web platform for designing aircraft, fighter jets, and drones. It provides an intelligent workspace for aerospace engineers, enthusiasts, and designers, seamlessly integrating generative AI for 3D modeling and predictive maintenance.
 
-## Using this example
+## Key Features
 
-Run the following command:
+- **AI-Powered Design Workspaces**: 
+  - **Text-to-Image-to-Model**: Generate 4 design concept images from a text prompt, select your favorite, and convert it into a 3D model.
+  - **Text-to-Model & Image-to-Model**: Direct generation of 3D aircraft components and full models from descriptions or reference images.
+  - **Blank Workspace**: A fully customizable 3D canvas for manual design and component assembly.
+- **Predictive Maintenance & Failure Analysis**: Monitor existing aircraft or drones. Upload CSV sensor data or manually enter flight details. Our integrated Gen AI analyzes the telemetry to predict component failures, estimate remaining flight hours, and provide actionable maintenance insights.
+- **AI Physics & Cost Analyst**: Within the 3D workspace, an intelligent chatbot acts as your co-engineer. Ask for physical analyses (e.g., real-world feasibility, weight, aerodynamics). The AI will proactively request necessary specifications (such as body material or engine type) to calculate manufacturing costs, weight distribution, and physics metrics accurately.
+- **Project Library**: A centralized dashboard to list, manage, and revisit all your design workspaces.
 
-```sh
-npx create-turbo@latest -e with-tailwind
-```
+## Monorepo Architecture
 
-## What's inside?
+This project is structured as a modern Turborepo workspace.
 
-This Turborepo includes the following packages/apps:
+- `apps/web`: The primary Next.js frontend application.
+- `packages/ui`: Shared React UI component library.
+- `packages/tailwind-config`: Shared Tailwind CSS v4 design tokens and configurations.
+- `packages/typescript-config`: Shared TypeScript rules.
+- `packages/eslint-config`: Shared ESLint settings.
 
-### Apps and Packages
+## Getting Started
 
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+1. Install dependencies using `pnpm` (from the repository root):
+   ```bash
+   pnpm install
+   ```
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+2. Start the development servers:
+   ```bash
+   pnpm run dev
+   ```
 
-### Building packages/ui
+3. The primary web application will be available at `http://localhost:3001`.
 
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
+## Development Commands
 
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
-
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
-
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
-
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
-
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- `pnpm run build` - Build all applications and packages.
+- `pnpm run lint` - Run ESLint checks across the monorepo.
+- `pnpm run check-types` - Run TypeScript compiler checks.
+- `pnpm run format` - Format the codebase using Prettier.

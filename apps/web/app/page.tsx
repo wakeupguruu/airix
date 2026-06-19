@@ -9,6 +9,7 @@ import { BenefitsSection } from "../components/home/BenefitsSection";
 import { PipelineSection } from "../components/home/PipelineSection";
 import { ShowcaseSection } from "../components/home/ShowcaseSection";
 import { ImpactSection } from "../components/home/ImpactSection";
+import { Footer } from "../components/home/Footer";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -25,6 +26,7 @@ export default function Home() {
       <PipelineSection />
       <ShowcaseSection />
       <ImpactSection />
+      <Footer />
     </div>
   );
 }

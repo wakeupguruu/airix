@@ -1,0 +1,526 @@
+/* ==========================================================================
+   Auth Pages — Scoped Styles
+   Split-panel login/register layout with custom form elements.
+   All colors reference @theme tokens from globals.css.
+   ========================================================================== */
+
+/* ── Split Panel Layout ─────────────────────────────────────────────────── */
+
+.auth-split {
+  display: flex;
+  min-height: 100vh;
+  font-family: var(--font-inter-regular);
+  background: var(--color-light-bg);
+  color: var(--color-light-text);
+}
+
+.auth-left {
+  width: 44%;
+  background: var(--color-dark-bg);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 48px;
+  overflow: hidden;
+  border-right: 1px solid var(--color-dark-border);
+}
+
+.auth-right {
+  width: 56%;
+  min-height: 100vh;
+  background: var(--color-light-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 48px;
+  position: relative;
+}
+
+/* ── Ghost Watermark ────────────────────────────────────────────────────── */
+
+.auth-watermark {
+  position: absolute;
+  bottom: 18%;
+  left: -8px;
+  font-family: var(--font-garamond-light);
+  font-size: clamp(110px, 13vw, 170px);
+  font-weight: 400;
+  color: var(--color-light-bg);
+  opacity: 0.03;
+  letter-spacing: -6px;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ── Form Card ──────────────────────────────────────────────────────────── */
+
+.auth-card {
+  background: var(--color-light-bg);
+  border: 1px solid var(--color-light-secondary-border);
+  border-radius: 16px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ── Tab Switcher ───────────────────────────────────────────────────────── */
+
+.auth-tabs {
+  display: flex;
+  background: var(--color-light-surface);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 32px;
+}
+
+.auth-tab {
+  flex: 1;
+  text-align: center;
+  padding: 9px;
+  border-radius: 8px;
+  font-family: var(--font-inter-regular);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-stone-gray);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.auth-tab:hover {
+  color: var(--color-light-muted);
+}
+
+.auth-tab.active {
+  background: var(--color-light-bg);
+  color: var(--color-light-text);
+  box-shadow: 0px 0px 0px 1px var(--color-light-secondary-border);
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+
+.auth-input-group {
+  margin-bottom: 18px;
+}
+
+.auth-label {
+  display: block;
+  font-family: var(--font-inter-regular);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12px;
+  color: var(--color-light-muted);
+  margin-bottom: 6px;
+}
+
+.auth-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.auth-label-link {
+  font-family: var(--font-inter-regular);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-light-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.auth-label-link:hover {
+  text-decoration: underline;
+}
+
+.auth-input-wrapper {
+  position: relative;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 1.6px 12px;
+  min-height: 44px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 12px;
+  font-family: var(--font-inter-regular);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-light-text);
+  background: var(--color-light-bg);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-input:focus {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0px 0px 0px 1px var(--color-focus-ring);
+}
+
+.auth-input::placeholder {
+  color: var(--color-stone-gray);
+}
+
+.auth-input.error {
+  border-color: var(--color-error);
+}
+
+.auth-input-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--color-stone-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-input-toggle:hover {
+  color: var(--color-light-muted);
+}
+
+.auth-error-text {
+  font-family: var(--font-inter-regular);
+  font-size: 11px;
+  color: var(--color-error);
+  margin-top: 6px;
+  display: none;
+}
+
+.auth-error-text.visible {
+  display: block;
+}
+
+/* ── Custom Checkbox ────────────────────────────────────────────────────── */
+
+.auth-checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.auth-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  margin-top: 2px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-checkbox:checked {
+  background: var(--color-light-primary);
+  border-color: var(--color-light-primary);
+}
+
+.auth-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 1.5px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.auth-checkbox:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.auth-checkbox-label {
+  font-family: var(--font-inter-regular);
+  font-size: 13px;
+  color: var(--color-light-muted);
+  line-height: 1.4;
+}
+
+.auth-checkbox-label a {
+  color: var(--color-light-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-checkbox-label a:hover {
+  text-decoration: underline;
+}
+
+/* ── Primary CTA Button ────────────────────────────────────────────────── */
+
+.auth-btn-primary {
+  width: 100%;
+  background: var(--color-light-primary);
+  color: var(--color-light-bg);
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-inter-regular);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0px 0px 0px 1px var(--color-light-primary);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.auth-btn-primary:hover {
+  background: var(--color-light-primary-active);
+  transform: translateY(-1px);
+}
+
+.auth-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ── Divider ────────────────────────────────────────────────────────────── */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-light-secondary-border);
+}
+
+.auth-divider-text {
+  font-family: var(--font-inter-regular);
+  font-size: 12px;
+  color: var(--color-stone-gray);
+  white-space: nowrap;
+}
+
+/* ── Google SSO Button ──────────────────────────────────────────────────── */
+
+.auth-btn-google {
+  width: 100%;
+  background: #ffffff;
+  color: var(--color-light-text);
+  padding: 12px 16px;
+  border: 1px solid var(--color-light-secondary-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-inter-regular);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.auth-btn-google:hover {
+  background: var(--color-light-bg);
+}
+
+/* ── Password Strength Bar ──────────────────────────────────────────────── */
+
+.strength-bar {
+  height: 3px;
+  border-radius: 4px;
+  background: var(--color-light-secondary-border);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s ease;
+  width: 0%;
+}
+
+.strength-label {
+  font-family: var(--font-inter-regular);
+  font-size: 11px;
+  color: var(--color-stone-gray);
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+/* ── Switch Link (bottom of card) ───────────────────────────────────────── */
+
+.auth-switch {
+  text-align: center;
+  margin-top: 24px;
+  font-family: var(--font-inter-regular);
+  font-size: 14px;
+  color: var(--color-stone-gray);
+}
+
+.auth-switch a {
+  color: var(--color-light-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* ── Back to Home ───────────────────────────────────────────────────────── */
+
+.auth-back {
+  position: absolute;
+  top: 32px;
+  left: 48px;
+  font-family: var(--font-inter-regular);
+  font-size: 14px;
+  color: var(--color-stone-gray);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.auth-back:hover {
+  color: var(--color-light-text);
+}
+
+/* ── Left Panel Feature List ────────────────────────────────────────────── */
+
+.auth-feature-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  align-items: flex-start;
+}
+
+.auth-feature-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+
+.auth-feature-text {
+  font-family: var(--font-inter-regular);
+  font-size: 14px;
+  color: var(--color-warm-silver);
+  line-height: 1.43;
+}
+
+/* ── Left Panel Testimonial ─────────────────────────────────────────────── */
+
+.auth-testimonial {
+  margin-top: auto;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-dark-border);
+}
+
+.auth-testimonial-quote {
+  font-family: var(--font-inter-regular);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-stone-gray);
+  line-height: 1.6;
+}
+
+.auth-testimonial-attribution {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-testimonial-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-dark-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter-regular);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-warm-silver);
+  flex-shrink: 0;
+}
+
+.auth-testimonial-name {
+  font-family: var(--font-inter-regular);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-light-muted);
+}
+
+.auth-testimonial-role {
+  font-family: var(--font-inter-regular);
+  font-size: 11px;
+  color: var(--color-stone-gray);
+}
+
+/* ── Mobile Logo (shown when left panel is hidden) ──────────────────────── */
+
+.auth-mobile-logo {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 991px) {
+  .auth-left {
+    display: none;
+  }
+
+  .auth-right {
+    width: 100%;
+    padding: 32px 24px;
+  }
+
+  .auth-back {
+    left: 24px;
+  }
+
+  .auth-mobile-logo {
+    display: flex;
+  }
+
+  .auth-card-heading {
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 767px) {
+  .auth-card {
+    padding: 24px;
+  }
+
+  .auth-right {
+    padding: 32px 16px;
+  }
+
+  .auth-back {
+    left: 16px;
+  }
+}

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
-import { Rocket, ShieldCheck, Check, BrainCircuit } from "lucide-react";
+import { Rocket, ShieldCheck, Check } from "lucide-react";
 
 // ─── ShowcaseSection ─────────────────────────────────────────────────────────
 
@@ -10,9 +10,6 @@ export function ShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const leftCardRef = useRef<HTMLDivElement>(null);
   const rightCardRef = useRef<HTMLDivElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
-  const lineLeftRef = useRef<SVGPathElement>(null);
-  const lineRightRef = useRef<SVGPathElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -44,22 +41,6 @@ export function ShowcaseSection() {
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.15 }
     );
-
-    // Badge pops in
-    tl.fromTo(
-      badgeRef.current,
-      { opacity: 0, scale: 0.5 },
-      { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" },
-      "-=0.3"
-    );
-
-    // Lines draw in
-    [lineLeftRef.current, lineRightRef.current].forEach((line) => {
-      if (!line) return;
-      const length = line.getTotalLength();
-      gsap.set(line, { strokeDasharray: length, strokeDashoffset: length });
-      tl.to(line, { strokeDashoffset: 0, duration: 0.8, ease: "power2.out" }, "-=0.4");
-    });
 
     return () => { tl.kill(); };
   }, [isVisible]);
@@ -249,23 +230,7 @@ export function ShowcaseSection() {
           </div>
         </div>
 
-        {/* AI Engine Badge Connector */}
-        <div className="flex flex-col items-center mt-0 relative">
-          {/* SVG connecting lines (desktop only) */}
-          <svg className="w-full h-16 overflow-visible hidden lg:block" viewBox="0 0 1000 60" fill="none" preserveAspectRatio="xMidYMid meet">
-            <path ref={lineLeftRef} d="M 300 0 C 300 45, 500 25, 500 58" stroke="#cc785c" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.25" />
-            <path ref={lineRightRef} d="M 700 0 C 700 45, 500 25, 500 58" stroke="#cc785c" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.25" />
-          </svg>
 
-          <div ref={badgeRef} className="flex flex-col items-center gap-2.5 opacity-0">
-            <div className="w-14 h-14 rounded-full bg-light-surface dark:bg-dark-surface border-2 border-light-primary/30 dark:border-dark-primary/30 flex items-center justify-center">
-              <BrainCircuit className="text-light-primary dark:text-dark-primary" size={22} />
-            </div>
-            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-light-primary dark:text-dark-primary font-sans">
-              Gemini AI Engine
-            </span>
-          </div>
-        </div>
 
       </div>
     </section>

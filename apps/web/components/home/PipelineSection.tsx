@@ -41,7 +41,7 @@ const STEPS: PipelineStep[] = [
     title: "Export & Manufacture",
     icon: Download,
     description:
-      "Export production-ready STEP/STL files or send directly to manufacturing partners.",
+      "Export production-ready STEP/STL files or send directly to certified manufacturing partners for rapid prototyping and seamless assembly.",
   },
 ];
 

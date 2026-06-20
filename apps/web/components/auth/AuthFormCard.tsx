@@ -8,7 +8,7 @@ interface AuthFormCardProps {
 
 export function AuthFormCard({ activeTab, children }: AuthFormCardProps) {
   return (
-    <div className="auth-card">
+    <div className="w-full max-w-[420px]">
       {/* Tab Switcher */}
       <div className="auth-tabs" role="tablist" aria-label="Authentication method">
         <Link

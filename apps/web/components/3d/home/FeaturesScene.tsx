@@ -1,5 +1,5 @@
 "use client"
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { AdaptiveDpr, OrbitControls } from '@react-three/drei'
 import { FeaturesModel } from './FeaturesModel'
 import { Suspense, useEffect, useRef, useState } from 'react'

@@ -1,11 +1,12 @@
+/* eslint-disable react/no-unknown-property */
 "use client"
 import { useGLTF, Center } from '@react-three/drei'
 import { useRef, useEffect, useCallback } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
-import { useThree } from '@react-three/fiber'
+import { useThree, GroupProps } from '@react-three/fiber'
 
-export function HomePageModel(props: any){
+export function HomePageModel(props: GroupProps){
 
     const { scene } = useGLTF('/models/f-22_raptor_draco.glb')
     const modelRef = useRef<THREE.Group>(null)

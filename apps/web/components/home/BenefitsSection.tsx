@@ -1,7 +1,5 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import gsap from "gsap";
 import { Globe2, Cpu, Wrench, ShieldCheck, Activity, Radio } from "lucide-react";
 
 const benefitsData = [
@@ -37,7 +35,13 @@ const benefitsData = [
   },
 ];
 
-function BenefitCard({ title, icon: Icon, desc }: any) {
+interface BenefitCardProps {
+  title: string;
+  icon: React.ElementType;
+  desc: string;
+}
+
+function BenefitCard({ title, icon: Icon, desc }: BenefitCardProps) {
   return (
     <div className="relative bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col overflow-hidden group">
       

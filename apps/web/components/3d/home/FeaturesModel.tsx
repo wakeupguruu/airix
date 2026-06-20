@@ -1,10 +1,11 @@
+/* eslint-disable react/no-unknown-property */
 "use client"
 import { useGLTF, Center } from '@react-three/drei'
 import { useRef, useLayoutEffect } from 'react'
 import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, GroupProps } from '@react-three/fiber'
 
-export function FeaturesModel(props: any) {
+export function FeaturesModel(props: GroupProps) {
     const { scene } = useGLTF('/models/Jet_Turbine_draco.glb')
     const modelRef = useRef<THREE.Group>(null)
 

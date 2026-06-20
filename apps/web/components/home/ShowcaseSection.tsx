@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { Rocket, ShieldCheck } from "lucide-react";
 

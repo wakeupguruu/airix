@@ -33,13 +33,17 @@ function LiftDragGraph() {
   return (
     <div className="relative w-full">
       <svg ref={svgRef} className="w-full" viewBox="0 0 420 220" fill="none">
-        {/* Fine grid — coral tinted, dense */}
+        {/* Fine grid — dual theme */}
         <defs>
-          <pattern id="grid-design" width="15" height="15" patternUnits="userSpaceOnUse">
-            <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#cc785c" strokeWidth="0.3" opacity="0.12" />
+          <pattern id="grid-design-light" width="15" height="15" patternUnits="userSpaceOnUse">
+            <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#cc785c" strokeWidth="0.5" opacity="0.2" />
+          </pattern>
+          <pattern id="grid-design-dark" width="15" height="15" patternUnits="userSpaceOnUse">
+            <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#cc785c" strokeWidth="0.5" opacity="0.25" />
           </pattern>
         </defs>
-        <rect x="45" y="35" width="355" height="148" fill="url(#grid-design)" />
+        <rect x="45" y="35" width="355" height="148" fill="url(#grid-design-light)" className="dark:hidden" />
+        <rect x="45" y="35" width="355" height="148" fill="url(#grid-design-dark)" className="hidden dark:block" />
 
         {/* Y Axis with arrow */}
         <line x1="45" y1="185" x2="45" y2="38" className="stroke-light-muted dark:stroke-dark-muted" strokeWidth="0.8" />
@@ -154,13 +158,17 @@ function HealthGraph() {
   return (
     <div className="relative w-full">
       <svg className="w-full" viewBox="0 0 420 220" fill="none">
-        {/* Fine grid — coral tinted, dense */}
+        {/* Fine grid — dual theme */}
         <defs>
-          <pattern id="grid-fleet" width="15" height="15" patternUnits="userSpaceOnUse">
-            <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#cc785c" strokeWidth="0.3" opacity="0.12" />
+          <pattern id="grid-fleet-light" width="15" height="15" patternUnits="userSpaceOnUse">
+            <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#cc785c" strokeWidth="0.5" opacity="0.2" />
+          </pattern>
+          <pattern id="grid-fleet-dark" width="15" height="15" patternUnits="userSpaceOnUse">
+            <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#cc785c" strokeWidth="0.5" opacity="0.25" />
           </pattern>
         </defs>
-        <rect x="45" y="35" width="355" height="148" fill="url(#grid-fleet)" />
+        <rect x="45" y="35" width="355" height="148" fill="url(#grid-fleet-light)" className="dark:hidden" />
+        <rect x="45" y="35" width="355" height="148" fill="url(#grid-fleet-dark)" className="hidden dark:block" />
 
         {/* Y Axis with arrow */}
         <line x1="45" y1="185" x2="45" y2="38" className="stroke-light-muted dark:stroke-dark-muted" strokeWidth="0.8" />
@@ -325,12 +333,8 @@ export function ShowcaseSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-[1px] bg-light-border dark:bg-dark-border rounded-2xl overflow-hidden">
 
           {/* ─── Design Studio ─── */}
-          <div ref={leftCardRef} className="bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 group relative overflow-hidden">
-            <div
-              className="absolute inset-0 bg-[#F97316]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none z-0"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='rgba(249, 115, 22, 0.25)'/%3E%3C/svg%3E")` }}
-            />
-            <div className="relative z-10 flex flex-col h-full">
+          <div ref={leftCardRef} className="bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 relative overflow-hidden">
+            <div className="flex flex-col h-full">
               <div className="flex items-center gap-3 mb-3">
                 <Rocket size={18} className="text-light-primary dark:text-dark-primary stroke-[1.5]" />
                 <span className="text-[18px] font-medium font-sans text-light-text dark:text-dark-text">Design Studio</span>
@@ -357,12 +361,8 @@ export function ShowcaseSection() {
           </div>
 
           {/* ─── Fleet Intelligence ─── */}
-          <div ref={rightCardRef} className="bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 group relative overflow-hidden">
-            <div
-              className="absolute inset-0 bg-[#F97316]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none z-0"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='rgba(249, 115, 22, 0.25)'/%3E%3C/svg%3E")` }}
-            />
-            <div className="relative z-10 flex flex-col h-full">
+          <div ref={rightCardRef} className="bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 relative overflow-hidden">
+            <div className="flex flex-col h-full">
               <div className="flex items-center gap-3 mb-3">
                 <ShieldCheck size={18} className="text-light-primary dark:text-dark-primary stroke-[1.5]" />
                 <span className="text-[18px] font-medium font-sans text-light-text dark:text-dark-text">Fleet Intelligence</span>

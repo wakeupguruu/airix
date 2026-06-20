@@ -65,3 +65,27 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-garamond-dark);
 }
+
+/* Custom transitions and scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #faf9f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e6dfd8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6c6a64;
+}
+
+/* Smooth input transitions */
+input, select, textarea {
+  outline: none;
+}

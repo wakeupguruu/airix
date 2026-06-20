@@ -14,15 +14,22 @@ export function FeaturesModel(props: any) {
     const scale = 0.02
     const wireframeOpacity = 0.35
     const color = '#c57e66'
-    const autoRotate = true
 
-    // Apply wireframe material
+    // Apply wireframe material — dispose old materials to prevent memory leak
     useLayoutEffect(() => {
+        const oldMaterials: THREE.Material[] = []
+
         scene.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh
                 if (mesh.material) {
-                    // Create a lightweight wireframe material
+                    // Collect old materials for disposal
+                    if (Array.isArray(mesh.material)) {
+                        oldMaterials.push(...mesh.material)
+                    } else {
+                        oldMaterials.push(mesh.material)
+                    }
+
                     mesh.material = new THREE.MeshBasicMaterial({ 
                         color: new THREE.Color(color),
                         wireframe: true,
@@ -32,11 +39,14 @@ export function FeaturesModel(props: any) {
                 }
             }
         })
+
+        // Dispose old materials
+        oldMaterials.forEach((mat) => mat.dispose())
     }, [scene, color, wireframeOpacity])
 
     // Gentle slow rotation
     useFrame((state, delta) => {
-        if (modelRef.current && autoRotate) {
+        if (modelRef.current) {
             modelRef.current.rotation.y += delta * 0.4
             modelRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
         }

@@ -2,31 +2,29 @@
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { HomePageModel } from './HomePageModel'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useRef } from 'react'
 
 export function Scene() {
     const [isMobile, setIsMobile] = useState(false)
     const [dynamicFov, setDynamicFov] = useState(25)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [isInView, setIsInView] = useState(true)
 
     useEffect(() => {
         const handleResize = () => {
             const w = window.innerWidth
-            
-            // DPR and Performance check
             setIsMobile(w < 768)
 
-            // Multi-step FOV scaling for perfect responsive fitting
             if (w > 1400) {
-                setDynamicFov(25) // Perfect PC
+                setDynamicFov(25)
             } else if (w > 1024) {
-                setDynamicFov(40) // Small laptop
-            } 
-             else if (w > 768) {
-                setDynamicFov(56) // Tablet
+                setDynamicFov(40)
+            } else if (w > 768) {
+                setDynamicFov(56)
             } else if (w > 480) {
-                setDynamicFov(64) // Large Mobile / Landscape
+                setDynamicFov(64)
             } else {
-                setDynamicFov(72) // Small Mobile 
+                setDynamicFov(72)
             }
         }
         
@@ -35,22 +33,38 @@ export function Scene() {
         return () => window.removeEventListener('resize', handleResize)
     }, [])
 
-    return (
-        <Canvas 
-            camera={{ position: [0, 2, 5], fov: dynamicFov }} 
-            dpr={isMobile ? [1, 1] : [1, 1.5]} 
-            performance={{ min: 0.5 }}
-            gl={{
-                antialias: !isMobile,
-                powerPreference: "high-performance",
-                alpha: true
-            }}
-        >
-            <Environment preset="city" resolution={256} />
+    // Pause rendering when scrolled off-screen
+    useEffect(() => {
+        const el = containerRef.current
+        if (!el) return
 
-            <Suspense fallback={null}>
-                <HomePageModel />
-            </Suspense>
-        </Canvas>
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsInView(entry.isIntersecting),
+            { threshold: 0, rootMargin: "100px" }
+        )
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div ref={containerRef} className="w-full h-full">
+            <Canvas 
+                camera={{ position: [0, 2, 5], fov: dynamicFov }} 
+                dpr={isMobile ? [1, 1] : [1, 1.5]} 
+                performance={{ min: 0.5 }}
+                frameloop={isInView ? "always" : "never"}
+                gl={{
+                    antialias: !isMobile,
+                    powerPreference: "high-performance",
+                    alpha: true
+                }}
+            >
+                <Environment preset="city" resolution={256} />
+
+                <Suspense fallback={null}>
+                    <HomePageModel />
+                </Suspense>
+            </Canvas>
+        </div>
     )
 }

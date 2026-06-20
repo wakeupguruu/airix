@@ -330,10 +330,10 @@ export function ShowcaseSection() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[1px] bg-light-border dark:bg-dark-border rounded-2xl overflow-hidden">
+        <div className="flex flex-col lg:flex-row border border-light-border dark:border-dark-border rounded-2xl overflow-hidden">
 
           {/* ─── Design Studio ─── */}
-          <div ref={leftCardRef} className="bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 relative overflow-hidden">
+          <div ref={leftCardRef} className="flex-1 bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-light-border dark:border-dark-border">
             <div className="flex flex-col h-full">
               <div className="flex items-center gap-3 mb-3">
                 <Rocket size={18} className="text-light-primary dark:text-dark-primary stroke-[1.5]" />
@@ -361,7 +361,7 @@ export function ShowcaseSection() {
           </div>
 
           {/* ─── Fleet Intelligence ─── */}
-          <div ref={rightCardRef} className="bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 relative overflow-hidden">
+          <div ref={rightCardRef} className="flex-1 bg-light-bg dark:bg-dark-bg p-8 lg:p-10 flex flex-col opacity-0 relative overflow-hidden">
             <div className="flex flex-col h-full">
               <div className="flex items-center gap-3 mb-3">
                 <ShieldCheck size={18} className="text-light-primary dark:text-dark-primary stroke-[1.5]" />

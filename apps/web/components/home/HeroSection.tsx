@@ -52,7 +52,7 @@ export function HeroSection() {
                             </svg>
                             
                             {/* Card Content */}
-                            <div className="relative w-[180px] md:w-[200px] rounded-[16px] border border-light-border dark:border-dark-border bg-white/70 dark:bg-dark-bg/70 backdrop-blur-md flex flex-col p-2 shadow-sm z-10 cursor-default">
+                            <div className="relative w-[180px] md:w-[200px] rounded-[16px] border border-light-border dark:border-dark-border bg-white/90 dark:bg-dark-bg/90 flex flex-col p-2 shadow-sm z-10 cursor-default">
                                 <div className="px-2 pt-1 pb-2 border-b border-light-border dark:border-dark-border">
                                     <h3 className="text-[12px] font-medium font-sans text-light-text dark:text-dark-text tracking-wide">
                                         Brembo Calipers
@@ -73,7 +73,7 @@ export function HeroSection() {
                             </svg>
                             
                             {/* Card Content */}
-                            <div className="relative w-[180px] md:w-[200px] rounded-[16px] border border-light-border dark:border-dark-border bg-white/70 dark:bg-dark-bg/70 backdrop-blur-md flex flex-col p-2 shadow-sm z-10 cursor-default">
+                            <div className="relative w-[180px] md:w-[200px] rounded-[16px] border border-light-border dark:border-dark-border bg-white/90 dark:bg-dark-bg/90 flex flex-col p-2 shadow-sm z-10 cursor-default">
                                 <div className="px-2 pt-1 pb-2 border-b border-light-border dark:border-dark-border">
                                     <h3 className="text-[12px] font-medium font-sans text-light-text dark:text-dark-text tracking-wide">
                                         Flight Specifications
@@ -101,7 +101,7 @@ export function HeroSection() {
                             </svg>
                             
                             {/* Card Content */}
-                            <div className="relative w-[180px] md:w-[200px] rounded-[16px] border border-light-border dark:border-dark-border bg-white/70 dark:bg-dark-bg/70 backdrop-blur-md flex flex-col p-2 shadow-sm z-10 cursor-default">
+                            <div className="relative w-[180px] md:w-[200px] rounded-[16px] border border-light-border dark:border-dark-border bg-white/90 dark:bg-dark-bg/90 flex flex-col p-2 shadow-sm z-10 cursor-default">
                                 <div className="px-2 pt-1 pb-2 border-b border-light-border dark:border-dark-border">
                                     <h3 className="text-[12px] font-medium font-sans text-light-text dark:text-dark-text tracking-wide">
                                         Adaptive Air Suspension

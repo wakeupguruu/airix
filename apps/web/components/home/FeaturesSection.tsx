@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { FeaturesScene } from "../3d/home/FeaturesScene";
 
 const FEATURES_DATA = [

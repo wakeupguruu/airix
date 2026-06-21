@@ -18,7 +18,9 @@ import {
   PhotoToModelIcon,
   AircraftBlueprintIllustration
 } from '../../components/workspace/Icons';
-import { Sidebar } from '../../components/workspace/Sidebar';
+import { Sidebar } from '../../components/Sidebar';
+import { CustomDropdown } from '../../components/CustomDropdown';
+import { ReactSketchCanvas } from 'react-sketch-canvas';
 
 // Initial Mock Workspaces mapped to new creation modes
 const initialWorkspaces: Workspace[] = [
@@ -133,8 +135,11 @@ function ActionDropdown({ onRename, onDuplicate, onDelete }: ActionDropdownProps
 function EmptyState({ onResetDefaults }: { onResetDefaults?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center p-12 border border-dashed border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] bg-transparent text-center">
-      <div className="w-48 h-28 mb-6 text-[#6c6a64] dark:text-[#a09d96] opacity-60">
-        <AircraftBlueprintIllustration />
+      <div className="mb-6 text-[#6c6a64] dark:text-[#a09d96] opacity-60">
+        <svg className="w-12 h-12 mx-auto stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <path d="M9 9l6 6M15 9l-6 6"></path>
+        </svg>
       </div>
       <h3 className="font-serif text-lg font-normal text-[#141413] dark:text-[#faf9f5] tracking-tight mb-2">No projects found</h3>
       <p className="text-xs text-[#6c6a64] dark:text-[#a09d96] max-w-sm mb-6 leading-relaxed">
@@ -168,6 +173,10 @@ export default function DashboardPage() {
   const [modalMode, setModalMode] = useState<Workspace['mode']>('Concept Studio');
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [modalError, setModalError] = useState('');
+  const [showConceptOptions, setShowConceptOptions] = useState(false);
+  const [selectedConcept, setSelectedConcept] = useState<number | null>(null);
+  const [isCanvasOpen, setIsCanvasOpen] = useState(false);
+  const canvasRef = useRef<any>(null);
 
   // Renaming State
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -198,10 +207,13 @@ export default function DashboardPage() {
   }, [renamingId]);
 
   // Modal Actions
-  const handleLaunchMode = (modeName: Workspace['mode']) => {
-    setModalMode(modeName);
+  const handleLaunchMode = (mode: string) => {
+    setModalMode(mode as Workspace['mode']);
     setNewWorkspaceName('');
     setModalError('');
+    setShowConceptOptions(false);
+    setSelectedConcept(null);
+    setIsCanvasOpen(false);
     setIsModalOpen(true);
   };
 
@@ -212,16 +224,29 @@ export default function DashboardPage() {
       return;
     }
 
-    const created: Workspace = {
-      id: `ws-${Date.now()}`,
+    if (modalMode === 'Concept Studio' && !showConceptOptions) {
+      // Move to concept selection step
+      setShowConceptOptions(true);
+      return;
+    }
+
+    if (modalMode === 'Concept Studio' && showConceptOptions && selectedConcept === null) {
+      setModalError('Please select a concept to proceed');
+      return;
+    }
+
+    const newWs: Workspace = {
+      id: Math.random().toString(36).substr(2, 9),
       name: newWorkspaceName.trim(),
       mode: modalMode,
-      status: 'Active',
-      lastEdited: 'Edited just now'
+      lastEdited: 'Just now',
+      status: 'Draft',
     };
-
-    setWorkspaces((prev) => [created, ...prev]);
+    
+    setWorkspaces([newWs, ...workspaces]);
     setIsModalOpen(false);
+    setShowConceptOptions(false);
+    setSelectedConcept(null);
   };
 
   // CRUD actions
@@ -280,19 +305,15 @@ export default function DashboardPage() {
     return matchesSearch && matchesMode && matchesStatus;
   });
 
+  const displayWorkspaces = filteredWorkspaces.slice(0, 10);
+
   // Badge Styles
   const getModeBadgeClass = (mode: string) => {
     switch (mode) {
       case 'Concept Studio':
-        return 'bg-[#cc785c]/10 text-[#cc785c] border-[#cc785c]/25';
-      case 'Blank Workspace':
-        return 'bg-blue-500/10 text-blue-800 dark:text-blue-300 border-blue-500/25';
-      case 'Text → 3D':
-        return 'bg-indigo-500/10 text-indigo-800 dark:text-indigo-300 border-indigo-500/25';
-      case 'Image → 3D':
-        return 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/25';
+        return 'bg-light-primary/10 text-light-primary border-light-primary/25';
       default:
-        return 'bg-[#efe9de]/35 dark:bg-[#161618]/35 text-[#6c6a64] dark:text-[#a09d96] border-[#e6dfd8] dark:border-[#2a2a2b]';
+        return 'bg-light-surface/50 dark:bg-dark-surface/50 text-light-muted dark:text-dark-muted border-light-border dark:border-dark-border';
     }
   };
 
@@ -300,30 +321,29 @@ export default function DashboardPage() {
     switch (status) {
       case 'Active':
         return (
-          <span className="flex items-center text-[10px] font-semibold text-[#cc785c] bg-[#cc785c]/5 px-2 py-0.5 rounded-full border border-[#cc785c]/10">
+          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-[#cc785c] bg-[#cc785c]/5 px-2 py-0.5 rounded-full border border-[#cc785c]/10">
             <span className="w-1.5 h-1.5 rounded-full bg-[#cc785c] mr-1.5" />
             Active
           </span>
         );
       case 'Analyzing':
         return (
-          <span className="flex items-center text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/5 px-2 py-0.5 rounded-full border border-amber-500/20">
+          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/5 px-2 py-0.5 rounded-full border border-amber-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
             Analyzing
           </span>
         );
       case 'Completed':
         return (
-          <span className="flex items-center text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/20">
+          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
             Completed
           </span>
         );
-      case 'Draft':
       default:
         return (
-          <span className="flex items-center text-[10px] font-semibold text-[#6c6a64] dark:text-[#a09d96] bg-[#efe9de]/35 dark:bg-[#161618]/35 px-2 py-0.5 rounded-full border border-[#e6dfd8] dark:border-[#2a2a2b]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#6c6a64]/60 mr-1.5" />
+          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-[#6c6a64] dark:text-[#a09d96] bg-[#efe9de]/30 dark:bg-[#161618]/30 px-2 py-0.5 rounded-full border border-[#e6dfd8] dark:border-[#2a2a2b]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#6c6a64] dark:bg-[#a09d96] mr-1.5 opacity-50" />
             Draft
           </span>
         );
@@ -440,7 +460,7 @@ export default function DashboardPage() {
                 Recent Projects
                 {workspaces.length > 0 && (
                   <span className="ml-2.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-[#efe9de]/35 dark:bg-[#161618]/35 text-[#6c6a64] dark:text-[#a09d96] border border-[#e6dfd8] dark:border-[#2a2a2b]">
-                    {filteredWorkspaces.length} of {workspaces.length}
+                    {displayWorkspaces.length} of {workspaces.length}
                   </span>
                 )}
               </h3>
@@ -448,7 +468,7 @@ export default function DashboardPage() {
               {/* Toolbar */}
               <div className="flex flex-wrap items-center gap-3">
                 {/* Search Input */}
-                <div className="relative flex-1 min-w-[200px] sm:max-w-xs">
+                <div className="relative flex-1 min-w-[280px] sm:max-w-xl">
                   <span className="absolute inset-y-0 left-3 flex items-center text-[#6c6a64] dark:text-[#a09d96] pointer-events-none">
                     <SearchIcon size={16} />
                   </span>
@@ -462,42 +482,22 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Mode Filter */}
-                <select
-                  value={selectedMode}
-                  onChange={(e) => setSelectedMode(e.target.value)}
-                  className="bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#6c6a64] dark:text-[#a09d96] focus:border-[#cc785c] transition-colors appearance-none pr-7 cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c6a64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 10px center',
-                    backgroundSize: '12px'
-                  }}
-                >
-                  <option value="All Modes">All Modes</option>
-                  <option value="Concept Studio">Concept Studio</option>
-                  <option value="Blank Workspace">Blank Workspace</option>
-                  <option value="Text → 3D">Text → 3D</option>
-                  <option value="Image → 3D">Image → 3D</option>
-                </select>
+                <div className="w-[140px]">
+                  <CustomDropdown
+                    value={selectedMode}
+                    onChange={setSelectedMode}
+                    options={['All Modes', 'Concept Studio', 'Blank Workspace', 'Text → 3D', 'Image → 3D']}
+                  />
+                </div>
 
                 {/* Status Filter */}
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#6c6a64] dark:text-[#a09d96] focus:border-[#cc785c] transition-colors appearance-none pr-7 cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c6a64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 10px center',
-                    backgroundSize: '12px'
-                  }}
-                >
-                  <option value="All Statuses">All Statuses</option>
-                  <option value="Draft">Draft</option>
-                  <option value="Active">Active</option>
-                  <option value="Analyzing">Analyzing</option>
-                  <option value="Completed">Completed</option>
-                </select>
+                <div className="w-[140px]">
+                  <CustomDropdown
+                    value={selectedStatus}
+                    onChange={setSelectedStatus}
+                    options={['All Statuses', 'Draft', 'Active', 'Analyzing', 'Completed']}
+                  />
+                </div>
 
                 <div className="h-5 w-[1px] bg-[#e6dfd8] dark:bg-[#2a2a2b] hidden sm:block" />
 
@@ -528,11 +528,11 @@ export default function DashboardPage() {
 
           {/* Workspaces Rendering / Empty State */}
           <div className="flex-grow">
-            {filteredWorkspaces.length > 0 ? (
+            {displayWorkspaces.length > 0 ? (
               viewMode === 'grid' ? (
                 /* Grid view with flat transparent border-only cards */
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredWorkspaces.map((workspace) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {displayWorkspaces.map((workspace) => (
                     <div
                       key={workspace.id}
                       className="flex flex-col bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] p-6 group transition-all duration-300 hover:border-[#cc785c]/40 hover:-translate-y-0.5"
@@ -596,7 +596,7 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e6dfd8]/60 dark:divide-[#2a2a2b]/60 bg-transparent">
-                      {filteredWorkspaces.map((workspace) => (
+                      {displayWorkspaces.map((workspace) => (
                         <tr
                           key={workspace.id}
                           className="hover:bg-[#efe9de]/30 dark:hover:bg-[#161618]/30 transition-colors duration-150 group bg-transparent"
@@ -605,10 +605,10 @@ export default function DashboardPage() {
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-3.5 bg-transparent">
                               <div className="w-9 h-9 rounded bg-[#efe9de]/40 dark:bg-[#161618]/40 border border-[#e6dfd8] dark:border-[#2a2a2b] flex items-center justify-center text-[#6c6a64] dark:text-[#a09d96] group-hover:text-[#cc785c] group-hover:border-[#cc785c]/35 transition-colors duration-200 flex-shrink-0">
-                                <svg className="w-5.5 h-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                  <path d="M3.27 6.96L12 12.01l8.73-5.05" />
-                                  <path d="M12 22.08V12" />
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                  <line x1="3" y1="9" x2="21" y2="9"></line>
+                                  <line x1="9" y1="21" x2="9" y2="9"></line>
                                 </svg>
                               </div>
                               <div className="flex-grow bg-transparent">
@@ -702,12 +702,17 @@ export default function DashboardPage() {
 
             {/* Mode Details Indicator */}
             <div className="mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] block mb-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
                 Selected Module
-              </span>
-              <span className="text-xs font-semibold text-[#cc785c] uppercase tracking-wider">
-                {modalMode}
-              </span>
+              </label>
+              <CustomDropdown
+                value={modalMode}
+                onChange={(val) => {
+                  setModalMode(val as any);
+                  if (modalError) setModalError('');
+                }}
+                options={['Concept Studio', 'Blank Workspace', 'Text → 3D', 'Image → 3D']}
+              />
             </div>
 
             {/* Form */}
@@ -731,6 +736,117 @@ export default function DashboardPage() {
                 {modalError && <span className="text-[11px] text-rose-500 font-medium mt-1 block">{modalError}</span>}
               </div>
 
+              {/* Dynamic Module Fields */}
+              {modalMode === 'Concept Studio' && !showConceptOptions && (
+                <div className="space-y-4">
+                  {!isCanvasOpen ? (
+                    <>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
+                          Concept Prompt
+                        </label>
+                        <textarea 
+                          placeholder="Describe your aircraft concept..."
+                          className="w-full bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-2 text-sm text-[#141413] dark:text-[#faf9f5] focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/25 transition-all duration-200 font-medium placeholder:text-[#6c6a64]/40 min-h-[80px] resize-none"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center bg-[#efe9de]/30 dark:bg-[#161618]/30 p-3 rounded-lg border border-[#e6dfd8] dark:border-[#2a2a2b]">
+                         <span className="text-xs text-[#6c6a64] dark:text-[#a09d96] font-medium">Have a sketch? Draw it out.</span>
+                         <button onClick={() => setIsCanvasOpen(true)} type="button" className="px-3 py-1.5 bg-[#141413] dark:bg-[#faf9f5] text-[#faf9f5] dark:text-[#141413] rounded text-[11px] font-bold uppercase tracking-wide hover:opacity-90 transition-opacity">
+                           Open Canvas
+                         </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#cc785c] mb-1.5">
+                          Drawing Canvas
+                        </label>
+                        <button onClick={() => setIsCanvasOpen(false)} type="button" className="text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] hover:text-[#141413] dark:hover:text-[#faf9f5]">
+                          Close Canvas
+                        </button>
+                      </div>
+                      <div className="h-[200px] w-full border-2 border-dashed border-[#cc785c]/40 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 cursor-crosshair">
+                        <ReactSketchCanvas
+                          ref={canvasRef}
+                          strokeWidth={3}
+                          strokeColor="#cc785c"
+                          canvasColor="transparent"
+                          width="100%"
+                          height="100%"
+                        />
+                      </div>
+                      <div className="flex space-x-2 justify-end mt-1">
+                         <button type="button" onClick={() => canvasRef.current?.undo()} className="text-[10px] font-bold uppercase text-[#6c6a64] dark:text-[#a09d96] hover:text-[#141413] dark:hover:text-[#faf9f5]">Undo</button>
+                         <button type="button" onClick={() => canvasRef.current?.clearCanvas()} className="text-[10px] font-bold uppercase text-rose-500 hover:text-rose-600">Clear</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {modalMode === 'Concept Studio' && showConceptOptions && (
+                <div className="space-y-4">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
+                    Select a Generated Concept
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2, 3, 4].map((num) => (
+                      <div 
+                        key={num}
+                        onClick={() => {
+                          setSelectedConcept(num);
+                          if (modalError) setModalError('');
+                        }}
+                        className={`aspect-[4/3] rounded-lg border-2 cursor-pointer transition-all overflow-hidden relative group ${
+                          selectedConcept === num 
+                            ? 'border-[#cc785c] ring-2 ring-[#cc785c]/20' 
+                            : 'border-[#e6dfd8] dark:border-[#2a2a2b] hover:border-[#cc785c]/50'
+                        }`}
+                      >
+                        <div className="absolute inset-0 bg-[#efe9de]/50 dark:bg-[#161618]/50 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-[#6c6a64]/40 dark:text-[#a09d96]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-[#141413]/80 backdrop-blur-sm rounded text-[9px] font-bold text-[#faf9f5]">
+                          Option {num}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {modalMode === 'Text → 3D' && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
+                    Generation Prompt
+                  </label>
+                  <textarea 
+                    placeholder="E.g., A delta wing fighter jet with twin engines..."
+                    className="w-full bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-2 text-sm text-[#141413] dark:text-[#faf9f5] focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/25 transition-all duration-200 font-medium placeholder:text-[#6c6a64]/40 min-h-[80px] resize-none"
+                  />
+                </div>
+              )}
+
+              {modalMode === 'Image → 3D' && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
+                    Reference Image
+                  </label>
+                  <label className="border-2 border-dashed border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#cc785c]/50 transition-colors bg-[#efe9de]/10 dark:bg-[#161618]/10 group">
+                    <input type="file" className="hidden" accept="image/*" />
+                    <svg className="w-8 h-8 text-[#6c6a64] dark:text-[#a09d96] group-hover:text-[#cc785c] mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs font-semibold text-[#141413] dark:text-[#faf9f5]">Click to upload</span>
+                    <span className="text-[11px] text-[#6c6a64] dark:text-[#a09d96] mt-1">or drag and drop</span>
+                  </label>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-[#e6dfd8]/60 dark:border-[#2a2a2b]/60">
                 <button
@@ -744,7 +860,7 @@ export default function DashboardPage() {
                   type="submit"
                   className="px-4 py-2 bg-[#cc785c] hover:bg-[#a85b42] rounded-lg text-xs font-semibold text-white transition-colors duration-200 shadow-sm"
                 >
-                  Create Workspace
+                  {modalMode === 'Concept Studio' && !showConceptOptions ? 'Generate Concepts' : 'Create Workspace'}
                 </button>
               </div>
             </form>

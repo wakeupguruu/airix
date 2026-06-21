@@ -56,6 +56,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.2.0(react@19.2.0)
+      react-sketch-canvas:
+        specifier: ^8.0.0
+        version: 8.0.0(react@19.2.0)
       three:
         specifier: ^0.184.0
         version: 0.184.0
@@ -2149,6 +2152,12 @@ packages:
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+
+  react-sketch-canvas@8.0.0:
+    resolution: {integrity: sha512-ijCcGxZsmHFfYMHVPoVj5tDvKCrjFihsjApxv+iaEnNbYneBT9nAKQaDEE8QUZb457DWO/AFx5i29HPt24R/PA==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18.0.0'
 
   react-use-measure@2.1.7:
     resolution: {integrity: sha512-KrvcAo13I/60HpwGO5jpW7E9DfusKyLPLvuHlUyP5zqnmAPhNc6qTRjUQrdTADl0lpPpDVU2/Gg51UlOGHXbdg==}
@@ -4439,6 +4448,10 @@ snapshots:
       react: 19.2.0
 
   react-is@16.13.1: {}
+
+  react-sketch-canvas@8.0.0(react@19.2.0):
+    dependencies:
+      react: 19.2.0
 
   react-use-measure@2.1.7(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:

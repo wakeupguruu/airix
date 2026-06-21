@@ -176,6 +176,7 @@ export default function DashboardPage() {
   const [showConceptOptions, setShowConceptOptions] = useState(false);
   const [selectedConcept, setSelectedConcept] = useState<number | null>(null);
   const [isCanvasOpen, setIsCanvasOpen] = useState(false);
+  const [hasSavedSketch, setHasSavedSketch] = useState(false);
   const canvasRef = useRef<any>(null);
 
   // Renaming State
@@ -214,6 +215,7 @@ export default function DashboardPage() {
     setShowConceptOptions(false);
     setSelectedConcept(null);
     setIsCanvasOpen(false);
+    setHasSavedSketch(false);
     setIsModalOpen(true);
   };
 
@@ -352,14 +354,14 @@ export default function DashboardPage() {
 
   const creationModesList = [
     {
-      name: 'Concept Studio' as const,
-      description: 'Generative aerodynamic shaping, wind tunnel styling, and lift optimization.',
-      icon: ConceptStudioIcon
-    },
-    {
       name: 'Blank Workspace' as const,
       description: 'Precision CAD modeler, structured drafting, and bulkhead arrangement.',
       icon: ManualBuilderIcon
+    },
+    {
+      name: 'Concept Studio' as const,
+      description: 'Generative aerodynamic shaping, wind tunnel styling, and lift optimization.',
+      icon: ConceptStudioIcon
     },
     {
       name: 'Text → 3D' as const,
@@ -383,15 +385,14 @@ export default function DashboardPage() {
         
         {/* Main Panel Content */}
         <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col bg-[#faf9f5] dark:bg-[#0C0C0E]">
-          
-          {/* 1. Workspace Header */}
-          <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#e6dfd8] dark:border-[#2a2a2b] pb-6 mb-8 gap-4">
+             {/* 1. Header & Quick Actions */}
+          <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 mb-8 gap-4">
             <div>
               <h1 className="font-serif text-3xl md:text-4xl font-normal text-[#141413] dark:text-[#faf9f5] tracking-tight mb-1">
-                Your Workspaces
+                {new Date().getHours() < 12 ? 'Good morning, Tanveer' : new Date().getHours() < 18 ? 'Good afternoon, Tanveer' : 'Good evening, Tanveer'}
               </h1>
               <p className="text-xs text-[#6c6a64] dark:text-[#a09d96] font-medium font-sans">
-                Manage, catalog, and configure your aircraft design projects
+                Ready to continue your aerodynamic shaping and wind tunnel analysis?
               </p>
             </div>
             
@@ -423,11 +424,11 @@ export default function DashboardPage() {
                   <button
                     key={idx}
                     onClick={() => handleLaunchMode(mode.name)}
-                    className="flex flex-col text-left p-6 bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#cc785c]/40 hover:bg-[#cc785c]/[0.02] cursor-pointer group"
+                    className="flex flex-col text-left p-5 bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#cc785c]/40 hover:bg-[#cc785c]/[0.02] cursor-pointer group"
                   >
                     {/* Icon container */}
-                    <div className="mb-4 p-3 bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg inline-flex self-start text-[#6c6a64] dark:text-[#a09d96] group-hover:text-[#cc785c] group-hover:border-[#cc785c]/35 transition-colors duration-300">
-                      <Icon size={24} />
+                    <div className="mb-4 p-2.5 bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg inline-flex self-start text-[#6c6a64] dark:text-[#a09d96] group-hover:text-[#cc785c] group-hover:border-[#cc785c]/35 transition-colors duration-300">
+                      <Icon size={22} />
                     </div>
                     
                     {/* Title */}
@@ -460,7 +461,7 @@ export default function DashboardPage() {
                 Recent Projects
                 {workspaces.length > 0 && (
                   <span className="ml-2.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-[#efe9de]/35 dark:bg-[#161618]/35 text-[#6c6a64] dark:text-[#a09d96] border border-[#e6dfd8] dark:border-[#2a2a2b]">
-                    {displayWorkspaces.length} of {workspaces.length}
+                    {displayWorkspaces.length} of {Math.max(10, workspaces.length)}
                   </span>
                 )}
               </h3>
@@ -604,13 +605,6 @@ export default function DashboardPage() {
                           {/* Project Name */}
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-3.5 bg-transparent">
-                              <div className="w-9 h-9 rounded bg-[#efe9de]/40 dark:bg-[#161618]/40 border border-[#e6dfd8] dark:border-[#2a2a2b] flex items-center justify-center text-[#6c6a64] dark:text-[#a09d96] group-hover:text-[#cc785c] group-hover:border-[#cc785c]/35 transition-colors duration-200 flex-shrink-0">
-                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                  <line x1="3" y1="9" x2="21" y2="9"></line>
-                                  <line x1="9" y1="21" x2="9" y2="9"></line>
-                                </svg>
-                              </div>
                               <div className="flex-grow bg-transparent">
                                 {renamingId === workspace.id ? (
                                   <input
@@ -739,50 +733,23 @@ export default function DashboardPage() {
               {/* Dynamic Module Fields */}
               {modalMode === 'Concept Studio' && !showConceptOptions && (
                 <div className="space-y-4">
-                  {!isCanvasOpen ? (
-                    <>
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
-                          Concept Prompt
-                        </label>
-                        <textarea 
-                          placeholder="Describe your aircraft concept..."
-                          className="w-full bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-2 text-sm text-[#141413] dark:text-[#faf9f5] focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/25 transition-all duration-200 font-medium placeholder:text-[#6c6a64]/40 min-h-[80px] resize-none"
-                        />
-                      </div>
-                      <div className="flex justify-between items-center bg-[#efe9de]/30 dark:bg-[#161618]/30 p-3 rounded-lg border border-[#e6dfd8] dark:border-[#2a2a2b]">
-                         <span className="text-xs text-[#6c6a64] dark:text-[#a09d96] font-medium">Have a sketch? Draw it out.</span>
-                         <button onClick={() => setIsCanvasOpen(true)} type="button" className="px-3 py-1.5 bg-[#141413] dark:bg-[#faf9f5] text-[#faf9f5] dark:text-[#141413] rounded text-[11px] font-bold uppercase tracking-wide hover:opacity-90 transition-opacity">
-                           Open Canvas
-                         </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#cc785c] mb-1.5">
-                          Drawing Canvas
-                        </label>
-                        <button onClick={() => setIsCanvasOpen(false)} type="button" className="text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] hover:text-[#141413] dark:hover:text-[#faf9f5]">
-                          Close Canvas
-                        </button>
-                      </div>
-                      <div className="h-[200px] w-full border-2 border-dashed border-[#cc785c]/40 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 cursor-crosshair">
-                        <ReactSketchCanvas
-                          ref={canvasRef}
-                          strokeWidth={3}
-                          strokeColor="#cc785c"
-                          canvasColor="transparent"
-                          width="100%"
-                          height="100%"
-                        />
-                      </div>
-                      <div className="flex space-x-2 justify-end mt-1">
-                         <button type="button" onClick={() => canvasRef.current?.undo()} className="text-[10px] font-bold uppercase text-[#6c6a64] dark:text-[#a09d96] hover:text-[#141413] dark:hover:text-[#faf9f5]">Undo</button>
-                         <button type="button" onClick={() => canvasRef.current?.clearCanvas()} className="text-[10px] font-bold uppercase text-rose-500 hover:text-rose-600">Clear</button>
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
+                      Concept Prompt
+                    </label>
+                    <textarea 
+                      placeholder="Describe your aircraft concept..."
+                      className="w-full bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-2 text-sm text-[#141413] dark:text-[#faf9f5] focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/25 transition-all duration-200 font-medium placeholder:text-[#6c6a64]/40 min-h-[80px] resize-none"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center bg-[#efe9de]/30 dark:bg-[#161618]/30 p-3 rounded-lg border border-[#e6dfd8] dark:border-[#2a2a2b]">
+                     <span className="text-xs text-[#6c6a64] dark:text-[#a09d96] font-medium">
+                       {hasSavedSketch ? 'Sketch attached to concept.' : 'Have a sketch? Draw it out.'}
+                     </span>
+                     <button onClick={() => setIsCanvasOpen(true)} type="button" className="px-3 py-1.5 bg-[#141413] dark:bg-[#faf9f5] text-[#faf9f5] dark:text-[#141413] rounded text-[11px] font-bold uppercase tracking-wide hover:opacity-90 transition-opacity">
+                       {hasSavedSketch ? 'Edit Canvas' : 'Open Canvas'}
+                     </button>
+                  </div>
                 </div>
               )}
 
@@ -864,6 +831,32 @@ export default function DashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Canvas Modal */}
+      {isCanvasOpen && (
+        <div className="fixed inset-0 z-[60] bg-[#faf9f5] dark:bg-[#0C0C0E] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between p-4 border-b border-[#e6dfd8] dark:border-[#2a2a2b] bg-[#faf9f5]/80 dark:bg-[#0C0C0E]/80 backdrop-blur-md">
+            <h2 className="font-serif text-lg font-normal text-[#141413] dark:text-[#faf9f5]">Concept Drawing Canvas</h2>
+            <div className="flex items-center space-x-4">
+              <button type="button" onClick={() => canvasRef.current?.undo()} className="text-xs font-semibold text-[#6c6a64] hover:text-[#141413] dark:text-[#a09d96] dark:hover:text-[#faf9f5] transition-colors">Undo</button>
+              <button type="button" onClick={() => canvasRef.current?.clearCanvas()} className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors">Clear</button>
+              <div className="w-[1px] h-4 bg-[#e6dfd8] dark:bg-[#2a2a2b]"></div>
+              <button type="button" onClick={() => setIsCanvasOpen(false)} className="text-xs font-semibold text-[#6c6a64] hover:text-[#141413] dark:text-[#a09d96] dark:hover:text-[#faf9f5] transition-colors">Cancel</button>
+              <button type="button" onClick={() => { setHasSavedSketch(true); setIsCanvasOpen(false); }} className="px-5 py-2 bg-[#cc785c] hover:bg-[#a85b42] text-white rounded-lg text-xs font-semibold transition-colors shadow-sm">Save Sketch</button>
+            </div>
+          </div>
+          <div className="flex-1 w-full bg-white dark:bg-[#161618] cursor-crosshair">
+            <ReactSketchCanvas
+              ref={canvasRef}
+              strokeWidth={4}
+              strokeColor="#cc785c"
+              canvasColor="transparent"
+              width="100%"
+              height="100%"
+            />
           </div>
         </div>
       )}

@@ -64,7 +64,7 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout>
-      <AuthFormCard activeTab="register">
+      <AuthFormCard>
         {/* Heading */}
         <h1
           className="auth-card-heading font-garamond-light"

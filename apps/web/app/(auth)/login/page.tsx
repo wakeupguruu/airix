@@ -45,7 +45,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <AuthFormCard activeTab="login">
+      <AuthFormCard>
         {/* Heading */}
         <h1
           className="auth-card-heading font-garamond-light"

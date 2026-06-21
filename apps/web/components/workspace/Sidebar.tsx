@@ -79,35 +79,49 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       style={{ width: isCollapsed ? 64 : 220 }}
     >
       {/* Header: Logo / Toggle */}
-      <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-5'} border-b border-light-border dark:border-dark-border shrink-0 transition-all duration-300`}>
-        {!isCollapsed && (
-          <div 
-            className="font-garamond-light text-[18px] text-light-text dark:text-dark-text tracking-widest opacity-100 transition-opacity duration-300"
-            style={{ fontWeight: 400, letterSpacing: '0.1em' }}
+      <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-5'} shrink-0 transition-all duration-300`}>
+        {isCollapsed ? (
+          <button 
+            onMouseEnter={() => setIsHoveringLogo(true)}
+            onMouseLeave={() => setIsHoveringLogo(false)}
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-light-primary dark:text-dark-primary outline-none transition-colors"
           >
-            AIRIX
-          </div>
+            {isHoveringLogo ? (
+              <PanelLeftOpen size={20} />
+            ) : (
+              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="12" cy="12" r="9" strokeDasharray="3 3" className="opacity-40" />
+                <path d="M12 3v18M3 12h18M9 9l6 6M9 15l6-6" />
+              </svg>
+            )}
+          </button>
+        ) : (
+          <>
+            <div className="flex items-center space-x-3">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-light-primary dark:text-dark-primary" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="12" cy="12" r="9" strokeDasharray="3 3" className="opacity-40" />
+                <path d="M12 3v18M3 12h18M9 9l6 6M9 15l6-6" />
+              </svg>
+              <div 
+                className="font-garamond-light text-[18px] text-light-text dark:text-dark-text tracking-widest whitespace-nowrap"
+                style={{ fontWeight: 400, letterSpacing: '0.1em' }}
+              >
+                AIRIX
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="text-light-muted hover:text-light-text dark:text-dark-muted dark:hover:text-dark-text transition-colors outline-none flex-shrink-0"
+            >
+              <PanelLeftClose size={20} />
+            </button>
+          </>
         )}
-
-        <button 
-          onMouseEnter={() => setIsHoveringLogo(true)}
-          onMouseLeave={() => setIsHoveringLogo(false)}
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`w-8 h-8 flex items-center justify-center flex-shrink-0 text-light-primary dark:text-dark-primary transition-colors outline-none`}
-        >
-          {isHoveringLogo ? (
-            isCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />
-          ) : (
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5}>
-              <circle cx="12" cy="12" r="9" strokeDasharray="3 3" className="opacity-40" />
-              <path d="M12 3v18M3 12h18M9 9l6 6M9 15l6-6" />
-            </svg>
-          )}
-        </button>
       </div>
 
       {/* Main Nav */}
-      <nav className="flex-1 py-4 px-2 flex flex-col gap-1">
+      <nav className="flex-1 px-3 flex flex-col gap-1.5">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/workspace' && pathname?.startsWith(item.href));
           return (
@@ -115,17 +129,17 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
               key={item.href}
               href={item.href}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center space-x-3 p-2 rounded-lg transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center p-2.5' : 'justify-start px-4 py-2 space-x-3'} rounded-lg transition-colors group ${
                 isActive 
                   ? 'bg-light-primary/10 text-light-primary dark:bg-dark-primary/10 dark:text-dark-primary' 
                   : 'hover:bg-light-surface/80 dark:hover:bg-dark-surface/80'
               }`}
             >
-              <div className={`flex flex-shrink-0 items-center justify-center rounded-md ${isActive ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} transition-colors mx-auto w-6`}>
+              <div className={`flex flex-shrink-0 items-center justify-center rounded-md ${isActive ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} transition-colors`}>
                 <item.icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
               </div>
               {!isCollapsed && (
-                <span className={`font-sans text-[13px] font-medium whitespace-nowrap transition-opacity duration-300 ${isActive ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} opacity-100`}>
+                <span className={`font-sans text-[13.5px] font-medium whitespace-nowrap transition-opacity duration-300 ${isActive ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} opacity-100`}>
                   {item.name}
                 </span>
               )}
@@ -135,21 +149,21 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-2 flex flex-col gap-1 border-t border-light-border dark:border-dark-border shrink-0">
+      <div className="px-3 pb-6 flex flex-col gap-1.5 shrink-0">
         <Link
           href="/subscription"
           title={isCollapsed ? "Subscription" : undefined}
-          className={`flex items-center space-x-3 p-2 rounded-lg transition-colors group ${
+          className={`flex items-center ${isCollapsed ? 'justify-center p-2.5' : 'justify-start px-4 py-2 space-x-3'} rounded-lg transition-colors group ${
             pathname === '/subscription'
               ? 'bg-light-primary/10 text-light-primary dark:bg-dark-primary/10 dark:text-dark-primary' 
               : 'hover:bg-light-surface/80 dark:hover:bg-dark-surface/80'
           }`}
         >
-          <div className={`flex flex-shrink-0 items-center justify-center rounded-md ${pathname === '/subscription' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} transition-colors mx-auto w-6`}>
+          <div className={`flex flex-shrink-0 items-center justify-center rounded-md ${pathname === '/subscription' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} transition-colors`}>
             <SubscriptionIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />
           </div>
           {!isCollapsed && (
-            <span className={`font-sans text-[13px] font-medium whitespace-nowrap transition-opacity duration-300 ${pathname === '/subscription' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} opacity-100`}>
+            <span className={`font-sans text-[13.5px] font-medium whitespace-nowrap transition-opacity duration-300 ${pathname === '/subscription' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} opacity-100`}>
               Subscription
             </span>
           )}
@@ -158,17 +172,17 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         <Link
           href="/settings"
           title={isCollapsed ? "Settings" : undefined}
-          className={`flex items-center space-x-3 p-2 rounded-lg transition-colors group ${
+          className={`flex items-center ${isCollapsed ? 'justify-center p-2.5' : 'justify-start px-4 py-2 space-x-3'} rounded-lg transition-colors group ${
             pathname === '/settings'
               ? 'bg-light-primary/10 text-light-primary dark:bg-dark-primary/10 dark:text-dark-primary' 
               : 'hover:bg-light-surface/80 dark:hover:bg-dark-surface/80'
           }`}
         >
-          <div className={`flex flex-shrink-0 items-center justify-center rounded-md ${pathname === '/settings' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} transition-colors mx-auto w-6`}>
+          <div className={`flex flex-shrink-0 items-center justify-center rounded-md ${pathname === '/settings' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} transition-colors`}>
             <SettingsIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />
           </div>
           {!isCollapsed && (
-            <span className={`font-sans text-[13px] font-medium whitespace-nowrap transition-opacity duration-300 ${pathname === '/settings' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} opacity-100`}>
+            <span className={`font-sans text-[13.5px] font-medium whitespace-nowrap transition-opacity duration-300 ${pathname === '/settings' ? 'text-light-primary dark:text-dark-primary' : 'text-light-muted dark:text-dark-muted group-hover:text-light-text dark:group-hover:text-dark-text'} opacity-100`}>
               Settings
             </span>
           )}
@@ -178,14 +192,14 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         <Link 
           href="/profile" 
           title={isCollapsed ? "Profile" : undefined}
-          className="mt-1 flex items-center space-x-3 p-1 rounded-lg hover:bg-light-surface/80 dark:hover:bg-dark-surface/80 transition-colors group"
+          className={`mt-1 flex items-center ${isCollapsed ? 'justify-center p-1.5' : 'justify-start px-3 py-1.5 space-x-3'} rounded-lg hover:bg-light-surface/80 dark:hover:bg-dark-surface/80 transition-colors group`}
         >
-          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface flex items-center justify-center overflow-hidden mx-auto">
-             <span className="font-sans font-semibold text-[11px] text-light-text dark:text-dark-text">J</span>
+          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface flex items-center justify-center overflow-hidden">
+             <span className="font-sans font-semibold text-[11px] text-light-text dark:text-dark-text">T</span>
           </div>
           {!isCollapsed && (
-            <div className="flex flex-col whitespace-nowrap transition-opacity duration-300 opacity-100 overflow-hidden pl-1">
-               <span className="font-sans font-semibold text-[13px] text-light-text dark:text-dark-text leading-tight truncate">Jonathan</span>
+            <div className="flex flex-col whitespace-nowrap transition-opacity duration-300 opacity-100 overflow-hidden">
+               <span className="font-sans font-semibold text-[13px] text-light-text dark:text-dark-text leading-tight truncate">Tanveer Singh</span>
                {/* Non-orange plan text as requested */}
                <span className="font-sans text-[11px] font-medium text-light-muted dark:text-dark-muted leading-tight mt-0.5 truncate">Pro Plan</span>
             </div>

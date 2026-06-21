@@ -244,7 +244,7 @@ export default function DesignSystem() {
                   <p>14px / 400 / 1.6</p>
                 </div>
                 <div className="col-span-3 text-[14px] font-normal leading-[1.6] font-mono">
-                  <code>airix.fleet.predict(&#123; aircraft: "uav-alpha" &#125;)</code>
+                  <code>airix.fleet.predict(&#123; aircraft: &quot;uav-alpha&quot; &#125;)</code>
                 </div>
              </div>
           </div>

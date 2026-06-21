@@ -1,11 +1,12 @@
+/* eslint-disable react/no-unknown-property */
 "use client"
 import { useGLTF, Center } from '@react-three/drei'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback, JSX } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import { useThree } from '@react-three/fiber'
 
-export function HomePageModel(props: any){
+export function HomePageModel(props: JSX.IntrinsicElements['group']){
 
     const { scene } = useGLTF('/models/f-22_raptor_draco.glb')
     const modelRef = useRef<THREE.Group>(null)
@@ -18,14 +19,13 @@ export function HomePageModel(props: any){
     // State for interaction
     const isDragging = useRef(false)
     const previousMousePosition = useRef({ x: 0, y: 0 })
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const resetRotation = () => {
+    const resetRotation = useCallback(() => {
         if (!modelRef.current) return
         
         const current = modelRef.current.rotation.y
         const target = defaultRotationY
-        
         
         let diff = (target - current) % (Math.PI * 2)
         if (diff < -Math.PI) diff += Math.PI * 2
@@ -38,9 +38,9 @@ export function HomePageModel(props: any){
             duration: 1.5,
             ease: "power2.out"
         })
-    }
+    }, [])
 
-    const triggerInteraction = () => {
+    const triggerInteraction = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current)
         if (modelRef.current) {
             gsap.killTweensOf(modelRef.current.rotation)
@@ -50,7 +50,7 @@ export function HomePageModel(props: any){
         timeoutRef.current = setTimeout(() => {
             resetRotation()
         }, 1500)
-    }
+    }, [resetRotation])
 
     const { gl } = useThree()
 
@@ -78,10 +78,7 @@ export function HomePageModel(props: any){
 
         const canvas = gl.domElement
         
-        // Only start drag if clicking inside the Hero canvas
         canvas.addEventListener('pointerdown', handlePointerDown)
-        
-        // These can stay on window so dragging doesn't break if mouse leaves the canvas bounds
         window.addEventListener('pointermove', handlePointerMove)
         window.addEventListener('pointerup', handlePointerUp)
 

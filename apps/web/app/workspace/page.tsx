@@ -12,20 +12,13 @@ import {
   EditIcon,
   CopyIcon,
   TrashIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
   ConceptStudioIcon,
   ManualBuilderIcon,
   DirectGenerationIcon,
   PhotoToModelIcon,
-  AircraftBlueprintIllustration,
-  SidebarIconDashboard,
-  SidebarIconProjects,
-  SidebarIconStudio,
-  SidebarIconAnalytics,
-  SidebarIconSettings
+  AircraftBlueprintIllustration
 } from '../../components/workspace/Icons';
+import { Sidebar } from '../../components/workspace/Sidebar';
 
 // Initial Mock Workspaces mapped to new creation modes
 const initialWorkspaces: Workspace[] = [
@@ -161,7 +154,7 @@ function EmptyState({ onResetDefaults }: { onResetDefaults?: () => void }) {
 }
 
 export default function DashboardPage() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [workspaces, setWorkspaces] = useState<Workspace[]>(initialWorkspaces);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
@@ -184,10 +177,9 @@ export default function DashboardPage() {
   // Auto-collapse sidebar on small screens
   useEffect(() => {
     const handleResize = () => {
+      // Keep it collapsed on small screens, default true otherwise
       if (window.innerWidth < 1024) {
         setIsCollapsed(true);
-      } else {
-        setIsCollapsed(false);
       }
     };
 
@@ -361,120 +353,13 @@ export default function DashboardPage() {
     }
   ];
 
-  const menuItems = [
-    { name: 'Dashboard', icon: SidebarIconDashboard, active: false },
-    { name: 'Workspaces', icon: SidebarIconProjects, active: true },
-    { name: 'Concept Lab', icon: SidebarIconStudio, active: false },
-    { name: 'Analytics', icon: SidebarIconAnalytics, active: false },
-    { name: 'Settings', icon: SidebarIconSettings, active: false },
-  ];
-
   return (
     <div className="min-h-screen bg-[#faf9f5] dark:bg-[#0C0C0E] text-[#141413] dark:text-[#faf9f5] flex font-sans">
-      {/* Collapsible Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-20 flex flex-col bg-[#faf9f5] dark:bg-[#0C0C0E] border-r border-[#e6dfd8] dark:border-[#2a2a2b] transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
-      >
-        {/* Sidebar Header: Logo */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-[#e6dfd8] dark:border-[#2a2a2b]">
-          {!isCollapsed ? (
-            <div className="flex items-center space-x-2">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#cc785c]" fill="none" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="12" r="9" strokeDasharray="3 3" className="opacity-40" />
-                <path d="M12 3v18M3 12h18M9 9l6 6M9 15l6-6" />
-              </svg>
-              <span className="font-serif text-xl font-normal tracking-widest text-[#141413] dark:text-[#faf9f5]">AIRIX</span>
-            </div>
-          ) : (
-            <div className="mx-auto">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 text-[#cc785c] mx-auto" fill="none" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="12" r="9" strokeDasharray="3 3" className="opacity-40" />
-                <path d="M12 3v18M3 12h18M9 9l6 6M9 15l6-6" />
-              </svg>
-            </div>
-          )}
-        </div>
-
-        {/* Workspace Selector */}
-        {!isCollapsed ? (
-          <div className="p-4 border-b border-[#e6dfd8] dark:border-[#2a2a2b]">
-            <div className="flex items-center justify-between px-3 py-2 bg-[#efe9de]/35 dark:bg-[#161618]/35 rounded-lg border border-[#e6dfd8] dark:border-[#2a2a2b] cursor-pointer hover:bg-[#efe9de]/70 dark:hover:bg-[#161618]/70 transition-colors duration-200">
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] font-semibold">Current Lab</span>
-                <span className="text-xs font-semibold text-[#141413] dark:text-[#faf9f5] truncate max-w-[140px]">Supersonic Wing Lab</span>
-              </div>
-              <ChevronDownIcon size={14} className="text-[#6c6a64] dark:text-[#a09d96]" />
-            </div>
-          </div>
-        ) : (
-          <div className="p-4 border-b border-[#e6dfd8] dark:border-[#2a2a2b] flex justify-center">
-            <div className="w-10 h-10 rounded-lg bg-[#efe9de]/35 dark:bg-[#161618]/35 border border-[#e6dfd8] dark:border-[#2a2a2b] flex items-center justify-center cursor-pointer hover:bg-[#efe9de]/70 dark:hover:bg-[#161618]/70 transition-colors duration-200">
-              <span className="text-xs font-bold text-[#cc785c] font-serif">S</span>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation Menu */}
-        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
-          {menuItems.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={idx}
-                className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 group text-left ${
-                  item.active
-                    ? 'bg-[#cc785c] text-white shadow-sm font-medium'
-                    : 'text-[#6c6a64] dark:text-[#a09d96] hover:bg-[#efe9de]/50 dark:hover:bg-[#161618]/50 hover:text-[#141413] dark:hover:text-[#faf9f5]'
-                }`}
-              >
-                <Icon size={20} className={`${item.active ? 'text-white' : 'text-[#6c6a64] dark:text-[#a09d96] group-hover:text-[#141413] dark:group-hover:text-[#faf9f5]'} transition-colors`} />
-                {!isCollapsed && (
-                  <span className="ml-3.5 text-sm font-medium tracking-wide">
-                    {item.name}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Bottom Actions & User Profile */}
-        <div className="p-3 border-t border-[#e6dfd8] dark:border-[#2a2a2b] space-y-3">
-          {/* Toggle Collapse Button */}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full flex items-center justify-center p-2.5 rounded-lg border border-[#e6dfd8] dark:border-[#2a2a2b] hover:bg-[#efe9de]/50 dark:hover:bg-[#161618]/50 text-[#6c6a64] dark:text-[#a09d96] hover:text-[#141413] dark:hover:text-[#faf9f5] transition-colors duration-200"
-          >
-            {isCollapsed ? (
-              <ChevronRightIcon size={18} />
-            ) : (
-              <div className="flex items-center space-x-2">
-                <ChevronLeftIcon size={18} />
-                <span className="text-xs font-medium">Collapse Sidebar</span>
-              </div>
-            )}
-          </button>
-
-          {/* User profile */}
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-2 py-1.5'} space-x-3`}>
-            <div className="relative w-9 h-9 rounded-full bg-[#cc785c]/10 border border-[#cc785c]/30 flex items-center justify-center text-[#cc785c] font-serif font-bold text-sm">
-              J
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#faf9f5] dark:border-[#0C0C0E] rounded-full"></span>
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col text-left overflow-hidden">
-                <span className="text-xs font-semibold text-[#141413] dark:text-[#faf9f5] truncate">Jonathan Archer</span>
-                <span className="text-[10px] text-[#6c6a64] dark:text-[#a09d96] truncate">Chief Aero Engineer</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
+      {/* Shared Sidebar Component */}
+      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
       {/* Main Content Area */}
-      <div className={`flex-grow flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isCollapsed ? 'pl-20' : 'pl-64'}`}>
+      <div className={`flex-grow flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isCollapsed ? 'pl-16' : 'pl-[220px]'}`}>
         
         {/* Main Panel Content */}
         <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col bg-[#faf9f5] dark:bg-[#0C0C0E]">

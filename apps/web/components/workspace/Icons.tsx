@@ -116,6 +116,7 @@ export const PhotoToModelIcon = ({ size = 32, className, ...props }: IconProps) 
 );
 
 // Empty State: Beautiful aircraft technical drawing blueprint
+// eslint-disable-next-line react/prop-types
 export const AircraftBlueprintIllustration = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
     viewBox="0 0 300 160"

@@ -31,7 +31,7 @@ export function Navbar() {
 
       <div className="flex items-center gap-4">
         <Link 
-          href="/design"
+          href="/login"
           className="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-md font-medium hover:opacity-90 transition-opacity text-[14px]"
         >
           Try Airix

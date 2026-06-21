@@ -43,6 +43,12 @@
   --color-light-border: #e6dfd8;
   --color-dark-border: #2a2a2b;
 
+  /* Functional Colors (Auth) */
+  --color-focus-ring: #3898ec;
+  --color-error: #b53333;
+  --color-warm-silver: #b0aea5;
+  --color-stone-gray: #87867f;
+
   /* Typography */
   --font-garamond-dark: var(--font-eb-garamond-dark), Georgia, serif;
   --font-garamond-light: var(--font-eb-garamond-light), Georgia, serif;

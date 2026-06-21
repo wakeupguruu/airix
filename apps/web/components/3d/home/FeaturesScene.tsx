@@ -14,7 +14,9 @@ export function FeaturesScene() {
         if (!el) return
 
         const observer = new IntersectionObserver(
-            ([entry]) => setIsInView(entry.isIntersecting),
+            (entries) => {
+                if (entries[0]) setIsInView(entries[0].isIntersecting)
+            },
             { threshold: 0, rootMargin: "100px" }
         )
         observer.observe(el)

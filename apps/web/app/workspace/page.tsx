@@ -22,145 +22,15 @@ import { Sidebar } from '../../components/Sidebar';
 import { CustomDropdown } from '../../components/CustomDropdown';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
 
-// Initial Mock Workspaces mapped to new creation modes
-const initialWorkspaces: Workspace[] = [
-  {
-    id: 'ws-1',
-    name: 'AeroFoil AX-100 Wing',
-    mode: 'Concept Studio',
-    status: 'Active',
-    lastEdited: 'Edited 2 hours ago'
-  },
-  {
-    id: 'ws-2',
-    name: 'V-Tail UAV Mesh Profile',
-    mode: 'Blank Workspace',
-    status: 'Completed',
-    lastEdited: 'Edited 1 day ago'
-  },
-  {
-    id: 'ws-3',
-    name: 'Biplane Struct V2 Refinement',
-    mode: 'Text → 3D',
-    status: 'Analyzing',
-    lastEdited: 'Edited 3 days ago'
-  },
-  {
-    id: 'ws-4',
-    name: 'Glider Fuselage Photogrammetry',
-    mode: 'Image → 3D',
-    status: 'Draft',
-    lastEdited: 'Edited 1 week ago'
-  }
-];
-
-interface ActionDropdownProps {
-  onRename: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
-}
-
-function ActionDropdown({ onRename, onDuplicate, onDelete }: ActionDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        className="p-1.5 hover:bg-[#efe9de]/50 dark:hover:bg-[#161618]/50 rounded-md text-[#6c6a64] dark:text-[#a09d96] hover:text-[#141413] dark:hover:text-[#faf9f5] border border-transparent hover:border-[#e6dfd8] dark:hover:border-[#2a2a2b] transition-all duration-200"
-      >
-        <MoreVerticalIcon size={18} />
-      </button>
-
-      {isOpen && (
-        <>
-          {/* Backdrop for closing */}
-          <div
-            className="fixed inset-0 z-30"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(false);
-            }}
-          />
-
-          {/* Dropdown Box */}
-          <div
-            className="absolute right-0 mt-1.5 w-40 bg-[#faf9f5] dark:bg-[#0C0C0E] border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg shadow-md z-40 py-1 origin-top-right transition-all duration-200 ease-out"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                onRename();
-              }}
-              className="w-full flex items-center px-3 py-2 text-xs font-semibold text-[#141413] dark:text-[#faf9f5] hover:bg-[#efe9de]/50 dark:hover:bg-[#161618]/50 hover:text-[#cc785c] transition-colors duration-150 text-left"
-            >
-              <EditIcon size={14} className="mr-2.5 text-[#6c6a64] dark:text-[#a09d96]" />
-              Rename
-            </button>
-            
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                onDuplicate();
-              }}
-              className="w-full flex items-center px-3 py-2 text-xs font-semibold text-[#141413] dark:text-[#faf9f5] hover:bg-[#efe9de]/50 dark:hover:bg-[#161618]/50 hover:text-[#cc785c] transition-colors duration-150 text-left"
-            >
-              <CopyIcon size={14} className="mr-2.5 text-[#6c6a64] dark:text-[#a09d96]" />
-              Duplicate
-            </button>
-
-            <div className="h-[1px] bg-[#e6dfd8] dark:bg-[#2a2a2b] my-1" />
-
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                onDelete();
-              }}
-              className="w-full flex items-center px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/10 hover:text-rose-700 transition-colors duration-150 text-left"
-            >
-              <TrashIcon size={14} className="mr-2.5 text-rose-400" />
-              Delete
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function EmptyState({ onResetDefaults }: { onResetDefaults?: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center p-12 border border-dashed border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] bg-transparent text-center">
-      <div className="mb-6 text-[#6c6a64] dark:text-[#a09d96] opacity-60">
-        <svg className="w-12 h-12 mx-auto stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <path d="M9 9l6 6M15 9l-6 6"></path>
-        </svg>
-      </div>
-      <h3 className="font-serif text-lg font-normal text-[#141413] dark:text-[#faf9f5] tracking-tight mb-2">No projects found</h3>
-      <p className="text-xs text-[#6c6a64] dark:text-[#a09d96] max-w-sm mb-6 leading-relaxed">
-        Start creating your custom aerodynamic profiles, structured draftings, or 3D meshes using our builder modules.
-      </p>
-      {onResetDefaults && (
-        <button
-          onClick={onResetDefaults}
-          className="inline-flex items-center space-x-2 px-4 py-2 border border-[#cc785c] hover:bg-[#cc785c]/5 text-[#cc785c] font-semibold text-xs rounded-md transition-all duration-200"
-        >
-          <RefreshIcon size={14} />
-          <span>Reset Demo Workspaces</span>
-        </button>
-      )}
-    </div>
-  );
-}
+import { mockWorkspaces, updateMockWorkspaces } from '../../lib/mockWorkspaces';
+import { ActionDropdown } from '../../components/workspace/ActionDropdown';
+import { EmptyState } from '../../components/workspace/EmptyState';
+import { WorkspaceCard } from '../../components/workspace/WorkspaceCard';
+import { WorkspaceListRow } from '../../components/workspace/WorkspaceListRow';
 
 export default function DashboardPage() {
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(initialWorkspaces);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>(mockWorkspaces);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   // Search and Filtering
@@ -245,7 +115,9 @@ export default function DashboardPage() {
       status: 'Draft',
     };
     
-    setWorkspaces([newWs, ...workspaces]);
+    const updated = [newWs, ...workspaces];
+    setWorkspaces(updated);
+    updateMockWorkspaces(updated);
     setIsModalOpen(false);
     setShowConceptOptions(false);
     setSelectedConcept(null);
@@ -259,9 +131,11 @@ export default function DashboardPage() {
 
   const handleSaveRename = (id: string) => {
     if (renameText.trim()) {
-      setWorkspaces((prev) =>
-        prev.map((ws) => (ws.id === id ? { ...ws, name: renameText.trim(), lastEdited: 'Edited just now' } : ws))
+      const updated = workspaces.map((ws) => 
+        ws.id === id ? { ...ws, name: renameText.trim(), lastEdited: 'Edited just now' } : ws
       );
+      setWorkspaces(updated);
+      updateMockWorkspaces(updated);
     }
     setRenamingId(null);
   };
@@ -289,14 +163,17 @@ export default function DashboardPage() {
     const updated = [...workspaces];
     updated.splice(index + 1, 0, duplicate);
     setWorkspaces(updated);
+    updateMockWorkspaces(updated);
   };
 
   const handleDeleteWorkspace = (id: string) => {
-    setWorkspaces((prev) => prev.filter((ws) => ws.id !== id));
+    const updated = workspaces.filter((ws) => ws.id !== id);
+    setWorkspaces(updated);
+    updateMockWorkspaces(updated);
   };
 
   const handleResetDefaults = () => {
-    setWorkspaces(initialWorkspaces);
+    setWorkspaces(mockWorkspaces);
   };
 
   // Filtering
@@ -308,49 +185,6 @@ export default function DashboardPage() {
   });
 
   const displayWorkspaces = filteredWorkspaces.slice(0, 10);
-
-  // Badge Styles
-  const getModeBadgeClass = (mode: string) => {
-    switch (mode) {
-      case 'Concept Studio':
-        return 'bg-light-primary/10 text-light-primary border-light-primary/25';
-      default:
-        return 'bg-light-surface/50 dark:bg-dark-surface/50 text-light-muted dark:text-dark-muted border-light-border dark:border-dark-border';
-    }
-  };
-
-  const getStatusIndicator = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return (
-          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-[#cc785c] bg-[#cc785c]/5 px-2 py-0.5 rounded-full border border-[#cc785c]/10">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#cc785c] mr-1.5" />
-            Active
-          </span>
-        );
-      case 'Analyzing':
-        return (
-          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/5 px-2 py-0.5 rounded-full border border-amber-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
-            Analyzing
-          </span>
-        );
-      case 'Completed':
-        return (
-          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
-            Completed
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex w-fit items-center text-[10px] font-semibold text-[#6c6a64] dark:text-[#a09d96] bg-[#efe9de]/30 dark:bg-[#161618]/30 px-2 py-0.5 rounded-full border border-[#e6dfd8] dark:border-[#2a2a2b]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#6c6a64] dark:bg-[#a09d96] mr-1.5 opacity-50" />
-            Draft
-          </span>
-        );
-    }
-  };
 
   const creationModesList = [
     {
@@ -469,7 +303,7 @@ export default function DashboardPage() {
               {/* Toolbar */}
               <div className="flex flex-wrap items-center gap-3">
                 {/* Search Input */}
-                <div className="relative flex-1 min-w-[280px] sm:max-w-xl">
+                <div className="relative flex-1 min-w-[280px]">
                   <span className="absolute inset-y-0 left-3 flex items-center text-[#6c6a64] dark:text-[#a09d96] pointer-events-none">
                     <SearchIcon size={16} />
                   </span>
@@ -534,53 +368,19 @@ export default function DashboardPage() {
                 /* Grid view with flat transparent border-only cards */
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {displayWorkspaces.map((workspace) => (
-                    <div
+                    <WorkspaceCard
                       key={workspace.id}
-                      className="flex flex-col bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] p-6 group transition-all duration-300 hover:border-[#cc785c]/40 hover:-translate-y-0.5"
-                    >
-                      {/* Starts directly with the metadata text */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className={`text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded border ${getModeBadgeClass(workspace.mode)}`}>
-                          {workspace.mode}
-                        </span>
-                        <ActionDropdown
-                          onRename={() => handleStartRename(workspace.id, workspace.name)}
-                          onDuplicate={() => handleDuplicateWorkspace(workspace.id)}
-                          onDelete={() => handleDeleteWorkspace(workspace.id)}
-                        />
-                      </div>
-
-                      {/* Project Title */}
-                      <div className="mb-4 flex-grow">
-                        {renamingId === workspace.id ? (
-                          <input
-                            ref={renameInputRef}
-                            type="text"
-                            value={renameText}
-                            onChange={(e) => setRenameText(e.target.value)}
-                            onBlur={() => handleSaveRename(workspace.id)}
-                            onKeyDown={(e) => handleRenameKeyDown(e, workspace.id)}
-                            className="w-full text-base font-normal font-serif text-[#141413] dark:text-[#faf9f5] bg-transparent border border-[#cc785c]/40 rounded px-2 py-0.5 focus:outline-none"
-                          />
-                        ) : (
-                          <h4
-                            onDoubleClick={() => handleStartRename(workspace.id, workspace.name)}
-                            className="font-serif text-base font-normal text-[#141413] dark:text-[#faf9f5] tracking-tight truncate group-hover:text-[#cc785c] cursor-text transition-colors duration-200"
-                            title="Double click to rename"
-                          >
-                            {workspace.name}
-                          </h4>
-                        )}
-                      </div>
-
-                      {/* Footer Meta */}
-                      <div className="flex items-center justify-between border-t border-[#e6dfd8]/60 dark:border-[#2a2a2b]/60 pt-3 mt-auto">
-                        <span className="text-[11px] text-[#6c6a64] dark:text-[#a09d96] font-medium font-sans">
-                          {workspace.lastEdited}
-                        </span>
-                        {getStatusIndicator(workspace.status)}
-                      </div>
-                    </div>
+                      workspace={workspace}
+                      renamingId={renamingId}
+                      renameText={renameText}
+                      setRenameText={setRenameText}
+                      onStartRename={handleStartRename}
+                      onSaveRename={handleSaveRename}
+                      onRenameKeyDown={handleRenameKeyDown}
+                      onDuplicate={handleDuplicateWorkspace}
+                      onDelete={handleDeleteWorkspace}
+                      renameInputRef={renameInputRef}
+                    />
                   ))}
                 </div>
               ) : (
@@ -598,63 +398,19 @@ export default function DashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-[#e6dfd8]/60 dark:divide-[#2a2a2b]/60 bg-transparent">
                       {displayWorkspaces.map((workspace) => (
-                        <tr
+                        <WorkspaceListRow
                           key={workspace.id}
-                          className="hover:bg-[#efe9de]/30 dark:hover:bg-[#161618]/30 transition-colors duration-150 group bg-transparent"
-                        >
-                          {/* Project Name */}
-                          <td className="px-6 py-4">
-                            <div className="flex items-center space-x-3.5 bg-transparent">
-                              <div className="flex-grow bg-transparent">
-                                {renamingId === workspace.id ? (
-                                  <input
-                                    ref={renameInputRef}
-                                    type="text"
-                                    value={renameText}
-                                    onChange={(e) => setRenameText(e.target.value)}
-                                    onBlur={() => handleSaveRename(workspace.id)}
-                                    onKeyDown={(e) => handleRenameKeyDown(e, workspace.id)}
-                                    className="w-full text-sm font-normal font-serif text-[#141413] dark:text-[#faf9f5] bg-transparent border border-[#cc785c]/40 rounded px-2.5 py-1 focus:outline-none"
-                                  />
-                                ) : (
-                                  <span
-                                    onDoubleClick={() => handleStartRename(workspace.id, workspace.name)}
-                                    className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5] group-hover:text-[#cc785c] cursor-text transition-colors duration-150 block truncate max-w-[280px]"
-                                    title="Double click to rename"
-                                  >
-                                    {workspace.name}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Creation Mode Badge */}
-                          <td className="px-6 py-4">
-                            <span className={`text-[10px] font-bold tracking-wide uppercase px-2.5 py-1 rounded border inline-block ${getModeBadgeClass(workspace.mode)}`}>
-                              {workspace.mode}
-                            </span>
-                          </td>
-
-                          {/* Last Edited Timestamp */}
-                          <td className="px-6 py-4 text-xs text-[#6c6a64] dark:text-[#a09d96] font-medium font-sans">
-                            {workspace.lastEdited}
-                          </td>
-
-                          {/* Status Badge */}
-                          <td className="px-6 py-4">
-                            {getStatusIndicator(workspace.status)}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="px-6 py-4 text-right">
-                            <ActionDropdown
-                              onRename={() => handleStartRename(workspace.id, workspace.name)}
-                              onDuplicate={() => handleDuplicateWorkspace(workspace.id)}
-                              onDelete={() => handleDeleteWorkspace(workspace.id)}
-                            />
-                          </td>
-                        </tr>
+                          workspace={workspace}
+                          renamingId={renamingId}
+                          renameText={renameText}
+                          setRenameText={setRenameText}
+                          onStartRename={handleStartRename}
+                          onSaveRename={handleSaveRename}
+                          onRenameKeyDown={handleRenameKeyDown}
+                          onDuplicate={handleDuplicateWorkspace}
+                          onDelete={handleDeleteWorkspace}
+                          renameInputRef={renameInputRef}
+                        />
                       ))}
                     </tbody>
                   </table>

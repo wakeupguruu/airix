@@ -1,36 +1,39 @@
-'use client';
-
 import React from 'react';
-import { AircraftBlueprintIllustration, RefreshIcon } from './Icons';
 
-interface EmptyStateProps {
+export interface EmptyStateProps {
   onResetDefaults?: () => void;
+  title?: string;
+  description?: string;
 }
 
-export default function EmptyState({ onResetDefaults }: EmptyStateProps) {
+export function EmptyState({ 
+  onResetDefaults, 
+  title = "No projects found",
+  description = "Start creating your custom aerodynamic profiles, structured draftings, or 3D meshes using our builder modules."
+}: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 bg-airix-surface border border-dashed border-airix-border rounded-[12px] text-center max-w-2xl mx-auto my-8">
-      {/* Aircraft Outline Illustration */}
-      <div className="w-full max-w-sm mb-6 text-airix-muted opacity-80">
-        <AircraftBlueprintIllustration className="w-full h-auto" />
+    <div className="flex flex-col items-center justify-center p-12 border border-dashed border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] bg-transparent text-center">
+      <div className="mb-6 text-[#6c6a64] dark:text-[#a09d96] opacity-60">
+        <svg className="w-12 h-12 mx-auto stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <path d="M9 9l6 6M15 9l-6 6"></path>
+        </svg>
       </div>
-
-      {/* Typography */}
-      <h3 className="font-serif text-2xl font-bold text-airix-text mb-2 tracking-wide">
-        No Workspaces Yet
+      <h3 className="font-serif text-lg font-normal text-[#141413] dark:text-[#faf9f5] tracking-tight mb-2">
+        {title}
       </h3>
-      <p className="text-sm text-airix-muted max-w-md mb-6 leading-relaxed">
-        Start by selecting a creation mode above to initialize a new aircraft design project, or search for another term.
+      <p className="text-xs text-[#6c6a64] dark:text-[#a09d96] max-w-sm mb-6 leading-relaxed">
+        {description}
       </p>
-
-      {/* Action button if they want to restore default mockups */}
       {onResetDefaults && (
         <button
           onClick={onResetDefaults}
-          className="flex items-center space-x-2 px-4 py-2 text-xs font-semibold text-airix-coral hover:text-airix-hover border border-airix-coral/30 hover:border-airix-hover/40 bg-airix-bg hover:bg-airix-surface rounded-lg transition-all duration-200"
+          className="inline-flex items-center space-x-2 px-4 py-2 border border-[#cc785c] hover:bg-[#cc785c]/5 text-[#cc785c] font-semibold text-xs rounded-md transition-all duration-200"
         >
-          <RefreshIcon size={14} />
-          <span>Restore Demo Projects</span>
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Reset Demo Workspaces</span>
         </button>
       )}
     </div>

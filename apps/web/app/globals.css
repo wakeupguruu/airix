@@ -63,6 +63,26 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
 .dark body {
   background-color: var(--color-dark-bg);
   color: var(--color-dark-text);

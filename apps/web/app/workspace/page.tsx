@@ -385,18 +385,18 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 /* List View matching transparent styling rules */
-                <div className="w-full overflow-x-auto bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px]">
+                <div className="w-full overflow-x-auto bg-transparent">
                   <table className="w-full border-collapse text-left bg-transparent">
                     <thead>
-                      <tr className="border-b border-[#e6dfd8] dark:border-[#2a2a2b] bg-[#e6dfd8]/10 dark:bg-[#2a2a2b]/10">
-                        <th className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5] px-6 py-4 tracking-tight w-1/3">Project Name</th>
-                        <th className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5] px-6 py-4 tracking-tight w-1/4">Creation Mode</th>
-                        <th className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5] px-6 py-4 tracking-tight w-1/6">Last Edited</th>
-                        <th className="font-serif text-sm font-normal text-[#141413] dark:text-[#faf9f5] px-6 py-4 tracking-tight w-1/6">Status</th>
+                      <tr className="border-b border-[#e6dfd8] dark:border-[#2a2a2b] bg-transparent">
+                        <th className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] px-6 py-4 w-1/3">Project Name</th>
+                        <th className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] px-6 py-4 w-1/4">Creation Mode</th>
+                        <th className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] px-6 py-4 w-1/6">Last Edited</th>
+                        <th className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] px-6 py-4 w-1/6">Status</th>
                         <th className="px-6 py-4 w-12"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e6dfd8]/60 dark:divide-[#2a2a2b]/60 bg-transparent">
+                    <tbody className="bg-transparent [&>tr]:border-b [&>tr]:border-[#e6dfd8] dark:[&>tr]:border-[#2a2a2b]">
                       {displayWorkspaces.map((workspace) => (
                         <WorkspaceListRow
                           key={workspace.id}

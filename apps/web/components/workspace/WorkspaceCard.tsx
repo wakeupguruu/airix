@@ -4,6 +4,7 @@ import React from 'react';
 import { Workspace } from '../../app/types';
 import { getModeBadgeClass, getStatusIndicator } from './workspaceUtils';
 import { ActionDropdown } from './ActionDropdown';
+import { useRouter } from 'next/navigation';
 
 export interface WorkspaceCardProps {
   workspace: Workspace;
@@ -30,8 +31,13 @@ export function WorkspaceCard({
   onDelete,
   renameInputRef
 }: WorkspaceCardProps) {
+  const router = useRouter();
+
   return (
-    <div className="flex flex-col bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] p-6 group transition-all duration-300 hover:border-[#cc785c]/40 hover:-translate-y-0.5">
+    <div 
+      onClick={() => router.push(`/workspace/${workspace.id}`)}
+      className="flex flex-col bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] p-6 group transition-all duration-300 hover:border-[#cc785c]/40 hover:-translate-y-0.5 cursor-pointer"
+    >
       {/* Starts directly with the metadata text */}
       <div className="flex items-center justify-between mb-3">
         <span className={`text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded border ${getModeBadgeClass(workspace.mode)}`}>
@@ -51,6 +57,7 @@ export function WorkspaceCard({
             ref={renameInputRef}
             type="text"
             value={renameText}
+            onClick={(e) => e.stopPropagation()}
             onChange={(e) => setRenameText(e.target.value)}
             onBlur={() => onSaveRename(workspace.id)}
             onKeyDown={(e) => onRenameKeyDown(e, workspace.id)}

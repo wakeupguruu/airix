@@ -4,6 +4,7 @@ import React from 'react';
 import { Workspace } from '../../app/types';
 import { getModeBadgeClass, getStatusIndicator } from './workspaceUtils';
 import { ActionDropdown } from './ActionDropdown';
+import { useRouter } from 'next/navigation';
 
 export interface WorkspaceListRowProps {
   workspace: Workspace;
@@ -30,8 +31,13 @@ export function WorkspaceListRow({
   onDelete,
   renameInputRef
 }: WorkspaceListRowProps) {
+  const router = useRouter();
+
   return (
-    <tr className="hover:bg-[#efe9de]/30 dark:hover:bg-[#161618]/30 transition-colors duration-150 group bg-transparent">
+    <tr 
+      onClick={() => router.push(`/workspace/${workspace.id}`)}
+      className="hover:bg-[#efe9de]/30 dark:hover:bg-[#161618]/30 transition-colors duration-150 group bg-transparent cursor-pointer"
+    >
       {/* Project Name */}
       <td className="px-6 py-4">
         <div className="flex items-center space-x-3.5 bg-transparent">
@@ -41,6 +47,7 @@ export function WorkspaceListRow({
                 ref={renameInputRef}
                 type="text"
                 value={renameText}
+                onClick={(e) => e.stopPropagation()}
                 onChange={(e) => setRenameText(e.target.value)}
                 onBlur={() => onSaveRename(workspace.id)}
                 onKeyDown={(e) => onRenameKeyDown(e, workspace.id)}

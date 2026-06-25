@@ -20,6 +20,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@gradio/client':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@react-three/drei':
         specifier: ^10.7.7
         version: 10.7.7(@react-three/fiber@9.6.1(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.184.0))(@types/react@19.2.2)(@types/three@0.184.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.184.0)
@@ -62,6 +65,15 @@ importers:
       three:
         specifier: ^0.184.0
         version: 0.184.0
+      three-bvh-csg:
+        specifier: ^0.0.18
+        version: 0.0.18(three-mesh-bvh@0.9.10(three@0.184.0))(three@0.184.0)
+      three-mesh-bvh:
+        specifier: ^0.9.10
+        version: 0.9.10(three@0.184.0)
+      zustand:
+        specifier: ^5.0.14
+        version: 5.0.14(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@next/eslint-plugin-next':
         specifier: ^16.2.0
@@ -252,6 +264,10 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@gradio/client@2.3.0':
+    resolution: {integrity: sha512-tACJOO/Jkh1rek60NjuRbZo41N8Hmd7zMfJHTKbExmt4eLT4Olrj9G1uMxk7rp60QiOQYJxfyj5Ugf4rRwkXQQ==}
+    engines: {node: '>=18.0.0'}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1435,6 +1451,9 @@ packages:
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
 
+  fetch-event-stream@0.1.6:
+    resolution: {integrity: sha512-GREtJ5HNikdU2AXtZ6E/5bk+aslMU6ie5mPG6H9nvsdDkkHQ6m5lHwmmmDTOBexok9hApQ7EprsXCdmz9ZC68w==}
+
   fflate@0.6.10:
     resolution: {integrity: sha512-IQrh3lEPM93wVCEczc9SaAOvkmcoQn/G8Bo1e8ZPlY3X3bnAxWaBdvTdvM1hP62iZp0BXWDy4vTAy4fF0+Dlpg==}
 
@@ -2344,8 +2363,19 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
+  three-bvh-csg@0.0.18:
+    resolution: {integrity: sha512-M3GCZMmGFgASGuDf+YMamM83nVlD/vdwzVHcYbFxgW+g1S7/nKPiuY00YVHOMbjmJPh8mLevGZL65ItHUuGt2w==}
+    peerDependencies:
+      three: '>=0.179.0'
+      three-mesh-bvh: '>=0.9.7'
+
   three-mesh-bvh@0.8.3:
     resolution: {integrity: sha512-4G5lBaF+g2auKX3P0yqx+MJC6oVt6sB5k+CchS6Ob0qvH0YIhuUk1eYr7ktsIpY+albCqE80/FVQGV190PmiAg==}
+    peerDependencies:
+      three: '>= 0.159.0'
+
+  three-mesh-bvh@0.9.10:
+    resolution: {integrity: sha512-UOlTgPIeqUURcwaG8knxvBaruwZlC4X3/WSHEFO7rYvMVv/YNUrkfFEszvfj36pXV88dCHoHNnIp0PifkirnTQ==}
     peerDependencies:
       three: '>= 0.159.0'
 
@@ -2602,6 +2632,10 @@ snapshots:
       react-dom: 19.2.0(react@19.2.0)
 
   '@floating-ui/utils@0.2.11': {}
+
+  '@gradio/client@2.3.0':
+    dependencies:
+      fetch-event-stream: 0.1.6
 
   '@humanfs/core@0.19.1': {}
 
@@ -3814,6 +3848,8 @@ snapshots:
     dependencies:
       reusify: 1.1.0
 
+  fetch-event-stream@0.1.6: {}
+
   fflate@0.6.10: {}
 
   fflate@0.8.3: {}
@@ -4700,7 +4736,16 @@ snapshots:
 
   tapable@2.3.0: {}
 
+  three-bvh-csg@0.0.18(three-mesh-bvh@0.9.10(three@0.184.0))(three@0.184.0):
+    dependencies:
+      three: 0.184.0
+      three-mesh-bvh: 0.9.10(three@0.184.0)
+
   three-mesh-bvh@0.8.3(three@0.184.0):
+    dependencies:
+      three: 0.184.0
+
+  three-mesh-bvh@0.9.10(three@0.184.0):
     dependencies:
       three: 0.184.0
 

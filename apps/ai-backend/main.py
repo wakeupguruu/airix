@@ -1,4 +1,5 @@
 import logging
+import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -16,10 +17,15 @@ app = FastAPI(
     version="2.0.0",
 )
 
-_ALLOWED_ORIGINS = [
+_DEFAULT_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:3001",
+    "http://localhost:3002",
+    "http://localhost:8080",
 ]
+
+_extra = os.getenv("CORS_ORIGINS", "")
+_ALLOWED_ORIGINS = _DEFAULT_ORIGINS + [o.strip() for o in _extra.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,11 +1,12 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": ["GOPATH", "GOROOT", "PATH"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "!.next/dev/**", "bin/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]

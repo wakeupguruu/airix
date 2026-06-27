@@ -4,12 +4,14 @@ export interface EmptyStateProps {
   onResetDefaults?: () => void;
   title?: string;
   description?: string;
+  actionButton?: React.ReactNode;
 }
 
 export function EmptyState({ 
   onResetDefaults, 
   title = "No projects found",
-  description = "Start creating your custom aerodynamic profiles, structured draftings, or 3D meshes using our builder modules."
+  description = "Start creating your custom aerodynamic profiles, structured draftings, or 3D meshes using our builder modules.",
+  actionButton
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center p-12 border border-dashed border-[#e6dfd8] dark:border-[#2a2a2b] rounded-[12px] bg-transparent text-center">
@@ -25,6 +27,7 @@ export function EmptyState({
       <p className="text-xs text-[#6c6a64] dark:text-[#a09d96] max-w-sm mb-6 leading-relaxed">
         {description}
       </p>
+      {actionButton}
       {onResetDefaults && (
         <button
           onClick={onResetDefaults}

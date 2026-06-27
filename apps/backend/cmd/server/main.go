@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	"github.com/wakeupguruu/airix/internal/config"
 	"github.com/wakeupguruu/airix/internal/routes"
 )
 
@@ -19,6 +20,9 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	pool := config.ConnectDB()                                                                                 
+    defer pool.Close()  
 
 	router := chi.NewRouter()
 

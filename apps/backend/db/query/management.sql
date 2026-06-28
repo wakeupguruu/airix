@@ -6,10 +6,20 @@ RETURNING *;
 -- name: GetManagementByID :one
 SELECT * FROM management WHERE id = $1;
 
--- name: GetManagementsByUserID :many
+-- name: GetManagementsFiltered :many
 SELECT * FROM management
-WHERE user_id = $1
-ORDER BY created_at DESC;
+WHERE user_id = sqlc.arg('user_id')
+  AND (sqlc.narg('type')::TEXT   IS NULL OR type = sqlc.narg('type')::TEXT)
+  AND (sqlc.narg('search')::TEXT IS NULL OR name ILIKE '%' || sqlc.narg('search')::TEXT || '%')
+ORDER BY created_at DESC
+LIMIT  sqlc.arg('limit_val')
+OFFSET sqlc.arg('offset_val');
+
+-- name: CountManagementsFiltered :one
+SELECT COUNT(*) FROM management
+WHERE user_id = sqlc.arg('user_id')
+  AND (sqlc.narg('type')::TEXT   IS NULL OR type = sqlc.narg('type')::TEXT)
+  AND (sqlc.narg('search')::TEXT IS NULL OR name ILIKE '%' || sqlc.narg('search')::TEXT || '%');
 
 -- name: UpdateManagement :one
 UPDATE management

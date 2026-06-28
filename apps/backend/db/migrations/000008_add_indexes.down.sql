@@ -1,0 +1,10 @@
+DROP INDEX IF EXISTS idx_workspaces_user_created;
+DROP INDEX IF EXISTS idx_workspaces_type;
+DROP INDEX IF EXISTS idx_workspaces_status;
+DROP INDEX IF EXISTS idx_workspaces_name_trgm;
+DROP INDEX IF EXISTS idx_workspace_models_workspace_created;
+DROP INDEX IF EXISTS idx_workspace_chats_workspace_created;
+DROP INDEX IF EXISTS idx_management_user_created;
+DROP INDEX IF EXISTS idx_management_type;
+DROP INDEX IF EXISTS idx_management_name_trgm;
+DROP INDEX IF EXISTS idx_management_chats_mgmt_created;

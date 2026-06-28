@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/wakeupguruu/airix/internal/config"
+	"github.com/wakeupguruu/airix/internal/db"
 	"github.com/wakeupguruu/airix/internal/routes"
 )
 
@@ -39,8 +40,10 @@ func main() {
 	}))
 
 	v1 := chi.NewRouter()
-
-	routes.SetupRouter(v1)
+	
+	q := db.New(pool)
+	routes.SetupRoutes(v1, q, redisClient)
+	
 	router.Mount("/api/v1", v1)
 
 

@@ -81,6 +81,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Username: req.Username,
 		Email:    req.Email,
 		Password: pgtype.Text{String: string(hash), Valid: true},
+		Plan:     "starter",
 	})
 	if err != nil {
 		utils.ResponseWithError(w, http.StatusInternalServerError, "failed to create user")
@@ -192,7 +193,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
+
 	accessToken, err := auth.GenerateAccessToken(claims.UserId, claims.Email)
 	if err != nil {
 		utils.ResponseWithError(w, http.StatusInternalServerError, "failed to generate token")

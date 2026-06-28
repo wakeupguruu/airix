@@ -22,7 +22,10 @@ func main() {
 	}
 
 	pool := config.ConnectDB()                                                                                 
-    defer pool.Close()  
+    defer pool.Close()
+
+	redisClient := config.ConnectRedis()                                                                         
+    defer redisClient.Close()
 
 	router := chi.NewRouter()
 

@@ -1,7 +1,12 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
+	"math/big"
 	"net/http"
 	"os"
 	"time"
@@ -204,4 +209,116 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseWithJSON(w, 200, map[string]interface{}{
 		"access_token": accessToken,
 	})
+}
+
+
+// Generate a 6-digit secure random OTP
+func generateOTP() (string, error) {
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%06d", n.Int64()), nil
+}
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email"`
+}
+
+
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var req ForgotPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.ResponseWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	user, err := h.Q.GetUserByEmail(r.Context(), req.Email)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			utils.ResponseWithJSON(w, http.StatusOK, map[string]string{"message": "If this email is registered, an OTP has been sent."})
+			return
+		}
+		utils.ResponseWithError(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	otp, err := generateOTP()
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to generate OTP")
+		return
+	}
+
+	redisKey := fmt.Sprintf("otp:%s", user.Email)
+	err = h.Redis.Set(r.Context(), redisKey, otp, 15*time.Minute).Err()
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to store OTP")
+		return
+	}
+
+	htmlBody := utils.GetOTPHTMLTemplate(otp)
+	err = utils.SendEmail(user.Email, "Airix Password Reset", htmlBody)
+	if err != nil {
+		log.Println("Email error:", err)
+		utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to send email")
+		return
+	}
+
+	utils.ResponseWithJSON(w, http.StatusOK, map[string]string{"message": "If this email is registered, an OTP has been sent."})
+}
+
+type ResetPasswordRequest struct {
+	Email       string `json:"email"`
+	OTP         string `json:"otp"`
+	NewPassword string `json:"new_password"`
+}
+
+
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req ResetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.ResponseWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	
+	redisKey := fmt.Sprintf("otp:%s", req.Email)
+	storedOTP, err := h.Redis.Get(r.Context(), redisKey).Result()
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusBadRequest, "Invalid or expired OTP")
+		return
+	}
+
+	
+	if storedOTP != req.OTP {
+		utils.ResponseWithError(w, http.StatusUnauthorized, "Incorrect OTP")
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to process new password")
+		return
+	}
+	hashedPassword := string(hash)
+
+	user, err := h.Q.GetUserByEmail(r.Context(), req.Email)
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	err = h.Q.UpdateUserPassword(r.Context(), db.UpdateUserPasswordParams{
+		ID:       user.ID,
+		Password: pgtype.Text{String: hashedPassword, Valid: true},
+	})
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to update password in database")
+		return
+	}
+
+	h.Redis.Del(r.Context(), redisKey)
+
+	utils.ResponseWithJSON(w, http.StatusOK, map[string]string{"message": "Password updated successfully"})
 }

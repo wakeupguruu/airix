@@ -23,6 +23,8 @@ func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client, s3Client 
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 		r.Post("/refresh", authHandler.Refresh)
+		r.Post("/forgot-password", authHandler.ForgotPassword)
+		r.Post("/reset-password", authHandler.ResetPassword)
 	})
 
 	// Protected: all routes below require a valid JWT

@@ -227,3 +227,36 @@ func (q *Queries) UpdateUserPlan(ctx context.Context, arg UpdateUserPlanParams) 
 	)
 	return i, err
 }
+
+const updateUserProfileImage = `-- name: UpdateUserProfileImage :one
+UPDATE users
+SET
+    profile_image = $2,                                                                        
+    updated_at = NOW()
+WHERE id = $1                                                                                  
+RETURNING id, username, full_name, email, contact_number, password, google_id, profile_image, plan, created_at, updated_at
+`
+
+type UpdateUserProfileImageParams struct {
+	ID           uuid.UUID   `json:"id"`
+	ProfileImage pgtype.Text `json:"profile_image"`
+}
+
+func (q *Queries) UpdateUserProfileImage(ctx context.Context, arg UpdateUserProfileImageParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserProfileImage, arg.ID, arg.ProfileImage)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.FullName,
+		&i.Email,
+		&i.ContactNumber,
+		&i.Password,
+		&i.GoogleID,
+		&i.ProfileImage,
+		&i.Plan,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

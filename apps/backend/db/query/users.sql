@@ -39,3 +39,12 @@ WHERE id = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
+
+
+-- name: UpdateUserProfileImage :one
+UPDATE users
+SET
+    profile_image = $2,                                                                        
+    updated_at = NOW()
+WHERE id = $1                                                                                  
+RETURNING *; 

@@ -28,6 +28,11 @@ func main() {
 	redisClient := config.ConnectRedis()                                                                         
     defer redisClient.Close()
 
+	s3Client, err := config.ConnectS3()                                                            
+    if err != nil {                                                                                
+        log.Fatalf("failed to connect s3: %v", err)                                                
+    }  
+
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
@@ -42,7 +47,7 @@ func main() {
 	v1 := chi.NewRouter()
 	
 	q := db.New(pool)
-	routes.SetupRoutes(v1, q, redisClient)
+	 routes.SetupRoutes(v1, q, redisClient, s3Client)
 	
 	router.Mount("/api/v1", v1)
 

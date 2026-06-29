@@ -4,17 +4,18 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/wakeupguruu/airix/internal/auth"
+	"github.com/wakeupguruu/airix/internal/config"
 	"github.com/wakeupguruu/airix/internal/db"
 	"github.com/wakeupguruu/airix/internal/handlers"
 )
 
-func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client) {
+func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client, s3Client *config.S3Client) {
 	// Health check
 	r.Get("/health", handlers.HandlerReadiness)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(q, redisClient)
-	userHandler := handlers.NewUserHandler(q)
+	userHandler := handlers.NewUserHandler(q, s3Client)
 	settingsHandler := handlers.NewSettingsHandler(q)
 
 	// Public: /auth
@@ -31,6 +32,7 @@ func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client) {
 		// User profile
 		r.Get("/users/me", userHandler.GetProfile)
 		r.Patch("/users/me", userHandler.UpdateProfile)
+		r.Post("/users/me/avatar", userHandler.UploadAvatar)
 
 		// Settings
 		r.Get("/users/me/settings", settingsHandler.GetSettings)

@@ -45,7 +45,7 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ResponseWithJSON(w, http.StatusOK, user)
+	utils.ResponseWithJSON(w, http.StatusOK, ToUserResponse(user))
 }
 
 
@@ -75,5 +75,5 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ResponseWithJSON(w, http.StatusOK, user)
+	utils.ResponseWithJSON(w, http.StatusOK, ToUserResponse(user))
 }

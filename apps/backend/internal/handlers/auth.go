@@ -109,7 +109,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 
 	utils.ResponseWithJSON(w, 201, map[string]interface{}{
-		"user":          user,
+		"user":          ToUserResponse(user),
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})
@@ -162,7 +162,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 
 	utils.ResponseWithJSON(w, 200, map[string]interface{}{
-		"user":          user,
+		"user":          ToUserResponse(user),
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})

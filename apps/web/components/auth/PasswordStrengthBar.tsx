@@ -29,7 +29,7 @@ function computeStrengthScore(password: string): number {
 
 export function PasswordStrengthBar({ password }: PasswordStrengthBarProps) {
   const score = computeStrengthScore(password);
-  const level = STRENGTH_LEVELS[score] ?? STRENGTH_LEVELS[0];
+  const level = STRENGTH_LEVELS[score] ?? STRENGTH_LEVELS[0]!;
 
   return (
     <div>

@@ -54,7 +54,7 @@ export function ImpactSection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsVisible(true);
           observer.disconnect();
         }
@@ -76,10 +76,10 @@ export function ImpactSection() {
     );
   }, [isVisible]);
 
-  const m0 = useCountUp(METRICS[0].end, METRICS[0].prefix, METRICS[0].suffix, isVisible);
-  const m1 = useCountUp(METRICS[1].end, METRICS[1].prefix, METRICS[1].suffix, isVisible);
-  const m2 = useCountUp(METRICS[2].end, METRICS[2].prefix, METRICS[2].suffix, isVisible);
-  const m3 = useCountUp(METRICS[3].end, METRICS[3].prefix, METRICS[3].suffix, isVisible);
+  const m0 = useCountUp(METRICS[0]!.end, METRICS[0]!.prefix, METRICS[0]!.suffix, isVisible);
+  const m1 = useCountUp(METRICS[1]!.end, METRICS[1]!.prefix, METRICS[1]!.suffix, isVisible);
+  const m2 = useCountUp(METRICS[2]!.end, METRICS[2]!.prefix, METRICS[2]!.suffix, isVisible);
+  const m3 = useCountUp(METRICS[3]!.end, METRICS[3]!.prefix, METRICS[3]!.suffix, isVisible);
   const metricValues = [m0, m1, m2, m3];
 
   return (

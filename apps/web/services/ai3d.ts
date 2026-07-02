@@ -101,9 +101,10 @@ export const ai3dService = {
     const { prompt, file, onProgress } = params
     onProgress?.('Connecting to tencent/Hunyuan3D-2...')
     try {
+      // hf_token missing from ClientOptions typings but accepted at runtime
       const client = await Client.connect('tencent/Hunyuan3D-2', {
         hf_token: HF_KEY,
-      })
+      } as any)
       let result
       if (file) {
         onProgress?.('Sending image to Hunyuan3D-2...')

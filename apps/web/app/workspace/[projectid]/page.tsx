@@ -115,7 +115,7 @@ export default function WorkspaceEditorPage() {
           <ViewportOverlay />
         </div>
       </div>
-      {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
+      {showShortcuts && <ShortcutsModal />}
     </div>
   );
 }

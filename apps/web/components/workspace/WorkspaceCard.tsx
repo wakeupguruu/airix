@@ -16,7 +16,7 @@ export interface WorkspaceCardProps {
   onRenameKeyDown: (e: React.KeyboardEvent, id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
-  renameInputRef: React.RefObject<HTMLInputElement>;
+  renameInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 export function WorkspaceCard({

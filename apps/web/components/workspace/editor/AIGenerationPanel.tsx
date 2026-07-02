@@ -6,7 +6,10 @@ import {
   Sparkles, Send, X, Paperclip, ImageIcon, FileText,
   PanelRight, Maximize2, PanelRightOpen, Plus, ChevronDown,
 } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import { useAIGeneration } from '../../../hooks/useAIGeneration'
+import { designChat, pollGenerate } from '../../../lib/api'
+import useStore from '../../../store/editorStore'
 
 type ActionMode = 'chat' | 'text-to-3d' | 'image-to-3d'
 type ViewMode   = 'floating' | 'sidebar' | 'fullscreen'
@@ -19,37 +22,21 @@ interface Message {
   tag?: string
 }
 
-const REPLIES = [
-  'I can generate 3D models from text or images. Try the text-to-3D option below.',
-  'Describe any object and I\'ll generate a 3D model for it.',
-  'You can also attach an image to reconstruct it as a 3D model.',
-  'Use the File menu to import existing GLTF / GLB files.',
-  'Press ? for keyboard shortcuts.',
-]
-
-let replyIdx = 0
-const nextReply = () => REPLIES[replyIdx++ % REPLIES.length]
-
 const VIEW_MODES = [
   { id: 'floating' as ViewMode,   label: 'Floating',    icon: <PanelRightOpen size={13} /> },
   { id: 'sidebar'  as ViewMode,   label: 'Sidebar',     icon: <PanelRight size={13} /> },
   { id: 'fullscreen' as ViewMode, label: 'Full screen', icon: <Maximize2 size={13} /> },
 ]
 
-const PROVIDERS = [
-  { id: 'piapi', label: 'PiAPI' },
-  { id: 'hf',    label: 'Hunyuan3D' },
-  { id: 'tripo', label: 'Tripo3D' },
-]
-
 export default function AIGenerationPanel() {
+  const params = useParams()
+  const workspaceId = params?.projectid as string
   const [isOpen, setIsOpen]         = useState(false)
   const [viewMode, setViewMode]     = useState<ViewMode>('floating')
   const [viewDrop, setViewDrop]     = useState(false)
   const [actionMode, setActionMode] = useState<ActionMode>('chat')
   const [actionDrop, setActionDrop] = useState(false)
-  const [provider, setProvider]     = useState<'piapi' | 'hf' | 'tripo'>('piapi')
-  const [provDrop, setProvDrop]     = useState(false)
+  const [isChatting, setIsChatting] = useState(false)
   const [prompt, setPrompt]         = useState('')
   const [file, setFile]             = useState<File | null>(null)
   const [messages, setMessages]     = useState<Message[]>([
@@ -59,7 +46,8 @@ export default function AIGenerationPanel() {
   const fileRef    = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
-  const { isGenerating, generationStatus, startGeneration } = useAIGeneration()
+  const { isGenerating, generationStatus, startGeneration } = useAIGeneration(workspaceId)
+  const addModel = useStore((s) => s.addModel)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -98,14 +86,36 @@ export default function AIGenerationPanel() {
     setFile(null)
 
     if (actionMode === 'chat') {
-      setTimeout(() => {
-        setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: nextReply() }])
-      }, 380)
+      setIsChatting(true)
+      try {
+        const sceneJson = { objects: useStore.getState().sceneObjects }
+        const res = await designChat(workspaceId, p, sceneJson)
+        const reply = [res.assistant_message?.content, res.follow_up_question].filter(Boolean).join('\n\n')
+        setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: reply || '(no response)' }])
+
+        // AI decided to generate a model mid-chat — poll the job and drop it in the scene
+        if (res.type === 'model_gen' && res.job_id) {
+          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: '', status: 'Generating 3D model… (1-3 min)' }])
+          const url = await pollGenerate(workspaceId, res.job_id, res.assistant_message?.id, (s) => {
+            setMessages(prev => {
+              const last = prev[prev.length - 1]
+              if (last?.status != null) return [...prev.slice(0, -1), { ...last, status: `Generating 3D model… (${s})` }]
+              return prev
+            })
+          })
+          addModel(url, `AI: ${p.substring(0, 15)}...`)
+          setMessages(prev => [...prev.filter(m => m.status == null), { id: Date.now().toString(), role: 'ai', content: '✓ Model generated and added to scene.' }])
+        }
+      } catch (err) {
+        setMessages(prev => [...prev.filter(m => m.status == null), { id: Date.now().toString(), role: 'ai', content: `Error: ${err.message}` }])
+      } finally {
+        setIsChatting(false)
+      }
       return
     }
 
-    await startGeneration(p, f, provider)
-  }, [prompt, file, actionMode, provider, startGeneration])
+    await startGeneration(p, f)
+  }, [prompt, file, actionMode, startGeneration, workspaceId, addModel])
 
   const handleFile = (e: any) => {
     e.preventDefault()
@@ -138,17 +148,16 @@ export default function AIGenerationPanel() {
     <>
       <Header
         viewMode={viewMode} viewDrop={viewDrop} setViewDrop={setViewDrop} setViewMode={setViewMode}
-        provider={provider} setProvider={setProvider} provDrop={provDrop} setProvDrop={setProvDrop}
         onClose={() => setIsOpen(false)}
       />
-      <Messages messages={messages} isGenerating={isGenerating} chatEndRef={chatEndRef} />
+      <Messages messages={messages} isGenerating={isGenerating || isChatting} chatEndRef={chatEndRef} />
       <Composer
         prompt={prompt} setPrompt={setPrompt}
         file={file} setFile={setFile}
         fileRef={fileRef} handleFile={handleFile}
         actionMode={actionMode} setActionMode={setActionMode}
         actionDrop={actionDrop} setActionDrop={setActionDrop}
-        isGenerating={isGenerating} send={send} onKey={onKey}
+        isGenerating={isGenerating || isChatting} send={send} onKey={onKey}
         placeholder={placeholder}
       />
     </>
@@ -181,20 +190,16 @@ export default function AIGenerationPanel() {
 
 // ── Header ────────────────────────────────────────────────────────────────────
 
-function Header({ viewMode, viewDrop, setViewDrop, setViewMode, provider, setProvider, provDrop, setProvDrop, onClose }) {
+function Header({ viewMode, viewDrop, setViewDrop, setViewMode, onClose }) {
   const viewRef = useRef<HTMLDivElement>(null)
-  const provRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const close = (e) => {
       if (viewRef.current && !viewRef.current.contains(e.target)) setViewDrop(false)
-      if (provRef.current && !provRef.current.contains(e.target)) setProvDrop(false)
     }
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [])
-
-  const currentProvider = PROVIDERS.find(p => p.id === provider)
 
   return (
     <div className="flex items-center justify-between px-4 py-3 shrink-0">
@@ -204,38 +209,10 @@ function Header({ viewMode, viewDrop, setViewDrop, setViewMode, provider, setPro
       </div>
 
       <div className="flex items-center gap-1">
-        {/* Provider */}
-        <div className="relative" ref={provRef}>
-          <button
-            onClick={() => { setProvDrop(v => !v); setViewDrop(false) }}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text rounded-md hover:bg-light-border/40 dark:hover:bg-dark-border/40 transition-colors"
-          >
-            {currentProvider?.label}
-            <ChevronDown size={10} className={`transition-transform ${provDrop ? 'rotate-180' : ''}`} />
-          </button>
-          {provDrop && (
-            <div className="absolute top-full right-0 mt-1 w-32 bg-light-bg dark:bg-dark-bg border border-light-border dark:border-dark-border rounded-xl shadow-xl py-1 z-50">
-              {PROVIDERS.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => { setProvider(p.id as any); setProvDrop(false) }}
-                  className={`w-full text-left px-3 py-1.5 text-[11px] transition-colors ${
-                    provider === p.id
-                      ? 'text-light-primary'
-                      : 'text-light-text dark:text-dark-text hover:bg-light-bg dark:hover:bg-dark-bg'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* View mode */}
         <div className="relative" ref={viewRef}>
           <button
-            onClick={() => { setViewDrop(v => !v); setProvDrop(false) }}
+            onClick={() => setViewDrop(v => !v)}
             className="p-1.5 text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text transition-colors rounded-lg hover:bg-light-border/40 dark:hover:bg-dark-border/40"
             title="View mode"
           >

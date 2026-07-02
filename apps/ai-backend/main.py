@@ -1,20 +1,32 @@
 import logging
 import os
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import chat, concept, generate, maintenance
-
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
+
+from routers import chat, concept, generate, maintenance
+from grpc_server import build_server
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    grpc_server = build_server()
+    await grpc_server.start()
+    yield
+    await grpc_server.stop(grace=5)
+
 
 app = FastAPI(
     title="Airix AI Backend",
     description="3D generation, AI chat, concept studio, and predictive maintenance.",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
 _DEFAULT_ORIGINS = [
@@ -47,6 +59,7 @@ def health_check():
         "status": "online",
         "service": "Airix AI Backend",
         "version": "2.0.0",
+        "grpc": f"AIService on :{os.getenv('GRPC_PORT', '50051')}",
         "endpoints": {
             "3d_generation": ["POST /generate", "GET /task/{provider}/{task_id}"],
             "chat": ["POST /chat/design", "POST /chat/maintenance"],

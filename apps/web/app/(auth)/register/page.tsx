@@ -7,6 +7,7 @@ import { AuthLayout } from "../../../components/auth/AuthLayout";
 import { AuthFormCard } from "../../../components/auth/AuthFormCard";
 import { AuthInput } from "../../../components/auth/AuthInput";
 import { PasswordStrengthBar } from "../../../components/auth/PasswordStrengthBar";
+import { register } from "../../../lib/api";
 
 /** Full-color Google "G" logo */
 function GoogleLogo() {
@@ -41,8 +42,10 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [confirmError, setConfirmError] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleCreateAccount() {
+  async function handleCreateAccount() {
     // Validate password match
     if (password !== confirmPassword) {
       setConfirmError(true);
@@ -50,8 +53,16 @@ export default function RegisterPage() {
     }
 
     setConfirmError(false);
-    // Front-end mock — redirect to home on success
-    router.push("/");
+    setError("");
+    setLoading(true);
+    try {
+      await register(fullName.trim(), email, password);
+      router.push("/workspace");
+    } catch (e: any) {
+      setError(e.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleConfirmPasswordChange(value: string) {
@@ -154,14 +165,22 @@ export default function RegisterPage() {
           </label>
         </div>
 
+        {/* Error */}
+        {error && (
+          <p style={{ color: "#e11d48", fontSize: "13px", marginBottom: "12px" }}>
+            {error}
+          </p>
+        )}
+
         {/* Primary CTA */}
         <button
           type="button"
           className="auth-btn-primary"
           id="register-submit"
           onClick={handleCreateAccount}
+          disabled={loading}
         >
-          Create Account
+          {loading ? "Creating account…" : "Create Account"}
         </button>
 
         {/* Divider */}

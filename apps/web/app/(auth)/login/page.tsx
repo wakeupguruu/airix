@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AuthLayout } from "../../../components/auth/AuthLayout";
 import { AuthFormCard } from "../../../components/auth/AuthFormCard";
 import { AuthInput } from "../../../components/auth/AuthInput";
+import { login } from "../../../lib/api";
 
 /** Full-color Google "G" logo */
 function GoogleLogo() {
@@ -37,10 +38,20 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSignIn() {
-    // Front-end mock — redirect to home on click
-    router.push("/");
+  async function handleSignIn() {
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password);
+      router.push("/workspace");
+    } catch (e: any) {
+      setError(e.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -108,14 +119,22 @@ export default function LoginPage() {
           </label>
         </div>
 
+        {/* Error */}
+        {error && (
+          <p style={{ color: "#e11d48", fontSize: "13px", marginBottom: "12px" }}>
+            {error}
+          </p>
+        )}
+
         {/* Primary CTA */}
         <button
           type="button"
           className="auth-btn-primary"
           id="login-submit"
           onClick={handleSignIn}
+          disabled={loading}
         >
-          Sign In
+          {loading ? "Signing in…" : "Sign In"}
         </button>
 
         {/* Divider */}

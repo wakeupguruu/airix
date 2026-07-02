@@ -22,16 +22,23 @@ import { Sidebar } from '../../components/Sidebar';
 import { CustomDropdown } from '../../components/CustomDropdown';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
 
-import { mockWorkspaces, updateMockWorkspaces } from '../../lib/mockWorkspaces';
+import { useRouter } from 'next/navigation';
+import { listWorkspaces, createWorkspace, renameWorkspace, deleteWorkspace, conceptImages } from '../../lib/api';
 import { ActionDropdown } from '../../components/workspace/ActionDropdown';
 import { EmptyState } from '../../components/workspace/EmptyState';
 import { WorkspaceCard } from '../../components/workspace/WorkspaceCard';
 import { WorkspaceListRow } from '../../components/workspace/WorkspaceListRow';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(mockWorkspaces);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Load workspaces from backend
+  useEffect(() => {
+    listWorkspaces().then(setWorkspaces).catch((e) => console.error('Failed to load workspaces:', e));
+  }, []);
   
   // Search and Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,6 +52,10 @@ export default function DashboardPage() {
   const [modalError, setModalError] = useState('');
   const [showConceptOptions, setShowConceptOptions] = useState(false);
   const [selectedConcept, setSelectedConcept] = useState<number | null>(null);
+  const [conceptPrompt, setConceptPrompt] = useState('');
+  const [conceptImgs, setConceptImgs] = useState<string[]>([]);
+  const [conceptWsId, setConceptWsId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCanvasOpen, setIsCanvasOpen] = useState(false);
   const [hasSavedSketch, setHasSavedSketch] = useState(false);
   const canvasRef = useRef<any>(null);
@@ -89,38 +100,57 @@ export default function DashboardPage() {
     setIsModalOpen(true);
   };
 
-  const handleCreateWorkspaceSubmit = (e: React.FormEvent) => {
+  const handleCreateWorkspaceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWorkspaceName.trim()) {
       setModalError('Workspace name is required');
       return;
     }
+    if (isSubmitting) return;
 
+    // Concept Studio step 1: create workspace + generate 4 concept images
     if (modalMode === 'Concept Studio' && !showConceptOptions) {
-      // Move to concept selection step
-      setShowConceptOptions(true);
+      if (!conceptPrompt.trim()) {
+        setModalError('Concept prompt is required');
+        return;
+      }
+      setIsSubmitting(true);
+      setModalError('');
+      try {
+        const ws = await createWorkspace(newWorkspaceName.trim(), modalMode);
+        setConceptWsId(ws.id);
+        setShowConceptOptions(true);
+        setConceptImgs([]);
+        // concept gen can take minutes on the fallback provider — kick off and show as they land
+        const res = await conceptImages(ws.id, conceptPrompt.trim());
+        setConceptImgs(res.images || []);
+      } catch (err: any) {
+        setModalError(err.message || 'Concept generation failed');
+      } finally {
+        setIsSubmitting(false);
+      }
       return;
     }
 
-    if (modalMode === 'Concept Studio' && showConceptOptions && selectedConcept === null) {
-      setModalError('Please select a concept to proceed');
+    if (modalMode === 'Concept Studio' && showConceptOptions) {
+      if (selectedConcept === null) {
+        setModalError('Please select a concept to proceed');
+        return;
+      }
+      // ponytail: selected concept image not yet fed into image→3D; open the workspace
+      router.push(`/workspace/${conceptWsId}`);
       return;
     }
 
-    const newWs: Workspace = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newWorkspaceName.trim(),
-      mode: modalMode,
-      lastEdited: 'Just now',
-      status: 'Draft',
-    };
-    
-    const updated = [newWs, ...workspaces];
-    setWorkspaces(updated);
-    updateMockWorkspaces(updated);
-    setIsModalOpen(false);
-    setShowConceptOptions(false);
-    setSelectedConcept(null);
+    setIsSubmitting(true);
+    setModalError('');
+    try {
+      const ws = await createWorkspace(newWorkspaceName.trim(), modalMode);
+      router.push(`/workspace/${ws.id}`);
+    } catch (err: any) {
+      setModalError(err.message || 'Failed to create workspace');
+      setIsSubmitting(false);
+    }
   };
 
   // CRUD actions
@@ -131,11 +161,11 @@ export default function DashboardPage() {
 
   const handleSaveRename = (id: string) => {
     if (renameText.trim()) {
-      const updated = workspaces.map((ws) => 
+      const updated = workspaces.map((ws) =>
         ws.id === id ? { ...ws, name: renameText.trim(), lastEdited: 'Edited just now' } : ws
       );
       setWorkspaces(updated);
-      updateMockWorkspaces(updated);
+      renameWorkspace(id, renameText.trim()).catch((e) => console.error('Rename failed:', e));
     }
     setRenamingId(null);
   };
@@ -148,32 +178,24 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDuplicateWorkspace = (id: string) => {
+  const handleDuplicateWorkspace = async (id: string) => {
     const target = workspaces.find((ws) => ws.id === id);
     if (!target) return;
-
-    const duplicate: Workspace = {
-      ...target,
-      id: `ws-${Date.now()}`,
-      name: `${target.name} (Copy)`,
-      lastEdited: 'Edited just now'
-    };
-
-    const index = workspaces.findIndex((ws) => ws.id === id);
-    const updated = [...workspaces];
-    updated.splice(index + 1, 0, duplicate);
-    setWorkspaces(updated);
-    updateMockWorkspaces(updated);
+    try {
+      await createWorkspace(`${target.name} (Copy)`, target.mode);
+      setWorkspaces(await listWorkspaces());
+    } catch (e) {
+      console.error('Duplicate failed:', e);
+    }
   };
 
   const handleDeleteWorkspace = (id: string) => {
-    const updated = workspaces.filter((ws) => ws.id !== id);
-    setWorkspaces(updated);
-    updateMockWorkspaces(updated);
+    setWorkspaces(workspaces.filter((ws) => ws.id !== id));
+    deleteWorkspace(id).catch((e) => console.error('Delete failed:', e));
   };
 
   const handleResetDefaults = () => {
-    setWorkspaces(mockWorkspaces);
+    listWorkspaces().then(setWorkspaces).catch(() => {});
   };
 
   // Filtering
@@ -493,8 +515,10 @@ export default function DashboardPage() {
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
                       Concept Prompt
                     </label>
-                    <textarea 
+                    <textarea
                       placeholder="Describe your aircraft concept..."
+                      value={conceptPrompt}
+                      onChange={(e) => setConceptPrompt(e.target.value)}
                       className="w-full bg-transparent border border-[#e6dfd8] dark:border-[#2a2a2b] rounded-lg px-3 py-2 text-sm text-[#141413] dark:text-[#faf9f5] focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c]/25 transition-all duration-200 font-medium placeholder:text-[#6c6a64]/40 min-h-[80px] resize-none"
                     />
                   </div>
@@ -514,25 +538,34 @@ export default function DashboardPage() {
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6c6a64] dark:text-[#a09d96] mb-1.5">
                     Select a Generated Concept
                   </label>
+                  {conceptImgs.length === 0 && (
+                    <p className="text-xs text-[#6c6a64] dark:text-[#a09d96] font-medium animate-pulse">
+                      Generating concepts… this can take a couple of minutes.
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 gap-3">
                     {[1, 2, 3, 4].map((num) => (
-                      <div 
+                      <div
                         key={num}
                         onClick={() => {
                           setSelectedConcept(num);
                           if (modalError) setModalError('');
                         }}
                         className={`aspect-[4/3] rounded-lg border-2 cursor-pointer transition-all overflow-hidden relative group ${
-                          selectedConcept === num 
-                            ? 'border-[#cc785c] ring-2 ring-[#cc785c]/20' 
+                          selectedConcept === num
+                            ? 'border-[#cc785c] ring-2 ring-[#cc785c]/20'
                             : 'border-[#e6dfd8] dark:border-[#2a2a2b] hover:border-[#cc785c]/50'
                         }`}
                       >
-                        <div className="absolute inset-0 bg-[#efe9de]/50 dark:bg-[#161618]/50 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-[#6c6a64]/40 dark:text-[#a09d96]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
+                        {conceptImgs[num - 1] ? (
+                          <img src={conceptImgs[num - 1]} alt={`Concept ${num}`} className="absolute inset-0 w-full h-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 bg-[#efe9de]/50 dark:bg-[#161618]/50 flex items-center justify-center animate-pulse">
+                            <svg className="w-8 h-8 text-[#6c6a64]/40 dark:text-[#a09d96]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        )}
                         <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-[#141413]/80 backdrop-blur-sm rounded text-[9px] font-bold text-[#faf9f5]">
                           Option {num}
                         </div>
@@ -581,9 +614,12 @@ export default function DashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#cc785c] hover:bg-[#a85b42] rounded-lg text-xs font-semibold text-white transition-colors duration-200 shadow-sm"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-[#cc785c] hover:bg-[#a85b42] disabled:opacity-60 rounded-lg text-xs font-semibold text-white transition-colors duration-200 shadow-sm"
                 >
-                  {modalMode === 'Concept Studio' && !showConceptOptions ? 'Generate Concepts' : 'Create Workspace'}
+                  {isSubmitting
+                    ? 'Working…'
+                    : modalMode === 'Concept Studio' && !showConceptOptions ? 'Generate Concepts' : modalMode === 'Concept Studio' ? 'Open Workspace' : 'Create Workspace'}
                 </button>
               </div>
             </form>

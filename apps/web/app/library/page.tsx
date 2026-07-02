@@ -6,7 +6,7 @@ import { Sidebar } from '../../components/Sidebar';
 import { CustomDropdown } from '../../components/CustomDropdown';
 import { SearchableDropdown } from '../../components/workspace/SearchableDropdown';
 import { GridViewIcon, ListViewIcon, SearchIcon } from '../../components/workspace/Icons';
-import { mockWorkspaces, updateMockWorkspaces } from '../../lib/mockWorkspaces';
+import { listWorkspaces, createWorkspace, renameWorkspace, deleteWorkspace } from '../../lib/api';
 import { WorkspaceCard } from '../../components/workspace/WorkspaceCard';
 import { WorkspaceListRow } from '../../components/workspace/WorkspaceListRow';
 import { EmptyState } from '../../components/workspace/EmptyState';
@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = 12;
 
 export default function LibraryPage() {
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(mockWorkspaces);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   // Search and Filtering
@@ -30,9 +30,9 @@ export default function LibraryPage() {
   const [renameText, setRenameText] = useState('');
   const renameInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync with global mock data if it updates (e.g. navigation back/forth)
+  // Load workspaces from backend
   useEffect(() => {
-    setWorkspaces(mockWorkspaces);
+    listWorkspaces().then(setWorkspaces).catch((e) => console.error('Failed to load workspaces:', e));
   }, []);
 
   // Auto-collapse sidebar on small screens
@@ -68,11 +68,11 @@ export default function LibraryPage() {
 
   const handleSaveRename = (id: string) => {
     if (renameText.trim()) {
-      const updated = workspaces.map((ws) => 
+      const updated = workspaces.map((ws) =>
         ws.id === id ? { ...ws, name: renameText.trim(), lastEdited: 'Edited just now' } : ws
       );
       setWorkspaces(updated);
-      updateMockWorkspaces(updated);
+      renameWorkspace(id, renameText.trim()).catch((e) => console.error('Rename failed:', e));
     }
     setRenamingId(null);
   };
@@ -85,28 +85,20 @@ export default function LibraryPage() {
     }
   };
 
-  const handleDuplicateWorkspace = (id: string) => {
+  const handleDuplicateWorkspace = async (id: string) => {
     const target = workspaces.find((ws) => ws.id === id);
     if (!target) return;
-
-    const duplicate: Workspace = {
-      ...target,
-      id: `ws-${Date.now()}`,
-      name: `${target.name} (Copy)`,
-      lastEdited: 'Edited just now'
-    };
-
-    const index = workspaces.findIndex((ws) => ws.id === id);
-    const updated = [...workspaces];
-    updated.splice(index + 1, 0, duplicate);
-    setWorkspaces(updated);
-    updateMockWorkspaces(updated);
+    try {
+      await createWorkspace(`${target.name} (Copy)`, target.mode);
+      setWorkspaces(await listWorkspaces());
+    } catch (e) {
+      console.error('Duplicate failed:', e);
+    }
   };
 
   const handleDeleteWorkspace = (id: string) => {
-    const updated = workspaces.filter((ws) => ws.id !== id);
-    setWorkspaces(updated);
-    updateMockWorkspaces(updated);
+    setWorkspaces(workspaces.filter((ws) => ws.id !== id));
+    deleteWorkspace(id).catch((e) => console.error('Delete failed:', e));
   };
 
   // Filtering

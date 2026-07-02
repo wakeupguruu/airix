@@ -23,7 +23,11 @@ func ConnectAI() *AIClient {
 	}
 
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		// concept images come back as base64 data URIs — well beyond the 4MB default
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(64*1024*1024)),
+	)
 	if err != nil {
 		log.Fatalf("failed to connect to AI gRPC server at %s: %v", addr, err)
 	}

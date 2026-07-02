@@ -9,7 +9,7 @@ import (
 	"github.com/wakeupguruu/airix/internal/handlers"
 )
 
-func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client, s3Client *config.S3Client) {
+func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client, s3Client *config.S3Client, aiClient *config.AIClient) {
 	// Health check
 	r.Get("/health", handlers.HandlerReadiness)
 
@@ -17,8 +17,8 @@ func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client, s3Client 
 	authHandler        := handlers.NewAuthHandler(q, redisClient)
 	userHandler        := handlers.NewUserHandler(q, s3Client)
 	settingsHandler    := handlers.NewSettingsHandler(q)
-	workspaceHandler   := handlers.NewWorkspaceHandler(q, s3Client)
-	maintenanceHandler := handlers.NewMaintenanceHandler(q, s3Client)
+	workspaceHandler   := handlers.NewWorkspaceHandler(q, s3Client, aiClient)
+	maintenanceHandler := handlers.NewMaintenanceHandler(q, s3Client, aiClient)
 
 	//  Public
 	r.Route("/auth", func(r chi.Router) {
@@ -55,10 +55,11 @@ func SetupRoutes(r *chi.Mux, q *db.Queries, redisClient *redis.Client, s3Client 
 				// Chat history
 				r.Get("/chats", workspaceHandler.GetChats)
 
-				// AI features (gRPC calls commented inside handlers)
-				r.Post("/chat/design", workspaceHandler.DesignChat)
-				r.Post("/generate",    workspaceHandler.Generate)
-				r.Post("/concept",     workspaceHandler.ConceptImages)
+				// AI features (via gRPC to Python AI backend)
+				r.Post("/chat/design",    workspaceHandler.DesignChat)
+				r.Post("/generate",       workspaceHandler.Generate)
+				r.Get("/generate/status", workspaceHandler.GenerateStatus)
+				r.Post("/concept",        workspaceHandler.ConceptImages)
 
 				
 				r.Post("/models/import", workspaceHandler.ImportModel)

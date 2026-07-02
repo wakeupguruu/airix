@@ -33,14 +33,13 @@ func main() {
 		log.Fatalf("failed to connect s3: %v", err)
 	}
 
-	// ── AI gRPC client (uncomment when Python AI backend is ready) ───────────
-	// aiClient := config.ConnectAI()
-	// defer aiClient.Close()
+	aiClient := config.ConnectAI()
+	defer aiClient.Close()
 
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:3002"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{"Link"},
@@ -51,7 +50,7 @@ func main() {
 	v1 := chi.NewRouter()
 	
 	q := db.New(pool)
-	 routes.SetupRoutes(v1, q, redisClient, s3Client)
+	 routes.SetupRoutes(v1, q, redisClient, s3Client, aiClient)
 	
 	router.Mount("/api/v1", v1)
 
@@ -60,9 +59,10 @@ func main() {
 	srv := &http.Server{
 		Handler:      	router,
 		Addr:         	":" + port,                                                                                
-        ReadTimeout: 	30 * time.Second,                                                                          
-        WriteTimeout:	60 * time.Second,                                                                          
-        IdleTimeout:	90 * time.Second, 
+        ReadTimeout: 	30 * time.Second,
+        // concept image fallback provider is slow — AI calls can take minutes
+        WriteTimeout:	180 * time.Second,
+        IdleTimeout:	90 * time.Second,
 	}
 
 	log.Print("Server is Starting...");

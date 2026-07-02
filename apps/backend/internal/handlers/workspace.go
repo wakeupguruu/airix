@@ -11,17 +11,18 @@ import (
 	"github.com/wakeupguruu/airix/internal/auth"
 	"github.com/wakeupguruu/airix/internal/config"
 	"github.com/wakeupguruu/airix/internal/db"
+	aipb "github.com/wakeupguruu/airix/internal/pb/ai"
 	"github.com/wakeupguruu/airix/internal/utils"
 )
 
 type WorkspaceHandler struct {
 	Q  *db.Queries
 	S3 *config.S3Client
-	// AI *config.AIClient // uncomment when Python AI backend is ready
+	AI *config.AIClient
 }
 
-func NewWorkspaceHandler(q *db.Queries, s3 *config.S3Client) *WorkspaceHandler {
-	return &WorkspaceHandler{Q: q, S3: s3}
+func NewWorkspaceHandler(q *db.Queries, s3 *config.S3Client, ai *config.AIClient) *WorkspaceHandler {
+	return &WorkspaceHandler{Q: q, S3: s3, AI: ai}
 }
 
 
@@ -338,47 +339,41 @@ func (h *WorkspaceHandler) DesignChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── AI gRPC call (uncomment when Python AI backend is ready) ──────────────
-	// history, _ := h.Q.GetWorkspaceChatsByWorkspaceID(r.Context(), workspaceID)
-	// msgs := make([]*aipb.ChatMessage, 0, len(history))
-	// for _, c := range history {
-	//     if c.Role == "user" || c.Role == "assistant" {
-	//         msgs = append(msgs, &aipb.ChatMessage{Role: c.Role, Content: c.Content})
-	//     }
-	// }
-	// aiResp, err := h.AI.Client.DesignChat(r.Context(), &aipb.DesignChatRequest{
-	//     History:     msgs,
-	//     Prompt:      req.Prompt,
-	//     SceneJson:   string(req.SceneJSON),
-	//     WorkspaceId: workspaceID.String(),
-	//     ChatId:      assistantChat.ID.String(),
-	// })
-	// if err != nil {
-	//     h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
-	//         ID: assistantChat.ID, Status: pgtype.Text{String: "failed", Valid: true},
-	//     })
-	//     utils.ResponseWithError(w, http.StatusInternalServerError, "AI service unavailable")
-	//     return
-	// }
-	// updated, _ := h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
-	//     ID:      assistantChat.ID,
-	//     Status:  pgtype.Text{String: "done", Valid: true},
-	//     Content: aiResp.Content,
-	// })
-	// utils.ResponseWithJSON(w, http.StatusOK, map[string]interface{}{
-	//     "user_message":      userChat,
-	//     "assistant_message": updated,
-	//     "type":              aiResp.Type,
-	//     "job_id":            aiResp.JobId,
-	// })
-	// return
-	// ─────────────────────────────────────────────────────────────────────────
-
-	
+	history, _ := h.Q.GetWorkspaceChatsByWorkspaceID(r.Context(), workspaceID)
+	msgs := make([]*aipb.ChatMessage, 0, len(history))
+	for _, c := range history {
+		if c.Role == "user" || c.Role == "assistant" {
+			msgs = append(msgs, &aipb.ChatMessage{Role: c.Role, Content: c.Content})
+		}
+	}
+	if len(msgs) > 10 {
+		msgs = msgs[len(msgs)-10:]
+	}
+	aiResp, err := h.AI.Client.DesignChat(r.Context(), &aipb.DesignChatRequest{
+		History:     msgs,
+		Prompt:      req.Prompt,
+		SceneJson:   string(req.SceneJSON),
+		WorkspaceId: workspaceID.String(),
+		ChatId:      assistantChat.ID.String(),
+	})
+	if err != nil {
+		h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+			ID: assistantChat.ID, Status: pgtype.Text{String: "failed", Valid: true},
+		})
+		utils.ResponseWithError(w, http.StatusInternalServerError, "AI service unavailable")
+		return
+	}
+	updated, _ := h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+		ID:      assistantChat.ID,
+		Status:  pgtype.Text{String: "done", Valid: true},
+		Content: aiResp.Content,
+	})
 	utils.ResponseWithJSON(w, http.StatusOK, map[string]interface{}{
-		"user_message":      userChat,
-		"assistant_message": assistantChat,
-		"note":              "AI backend not connected yet — stub response",
+		"user_message":       userChat,
+		"assistant_message":  updated,
+		"type":               aiResp.Type,
+		"follow_up_question": aiResp.FollowUpQuestion,
+		"job_id":             aiResp.JobId,
 	})
 }
 
@@ -433,36 +428,104 @@ func (h *WorkspaceHandler) Generate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── AI gRPC call (uncomment when Python AI backend is ready) ──────────────
-	// aiResp, err := h.AI.Client.Generate(r.Context(), &aipb.GenerateRequest{
-	//     Mode:        req.Mode,
-	//     Prompt:      req.Prompt,
-	//     ImageUrl:    req.ImageURL,
-	//     ChatId:      pendingChat.ID.String(),
-	//     WorkspaceId: workspaceID.String(),
-	// })
-	// if err != nil {
-	//     utils.ResponseWithError(w, http.StatusInternalServerError, "AI generation failed")
-	//     return
-	// }
-	// h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
-	//     ID:      pendingChat.ID,
-	//     Status:  pgtype.Text{String: aiResp.Status, Valid: true},
-	//     Content: "Generation started",
-	// })
-	// utils.ResponseWithJSON(w, http.StatusAccepted, map[string]interface{}{
-	//     "job_id":  aiResp.JobId,
-	//     "chat_id": pendingChat.ID,
-	//     "status":  aiResp.Status,
-	// })
-	// return
-	// ─────────────────────────────────────────────────────────────────────────
-
-	utils.ResponseWithJSON(w, http.StatusAccepted, map[string]interface{}{
-		"chat_id": pendingChat.ID,
-		"status":  "pending",
-		"note":    "AI backend not connected yet — stub response",
+	aiResp, err := h.AI.Client.Generate(r.Context(), &aipb.GenerateRequest{
+		Mode:        req.Mode,
+		Prompt:      req.Prompt,
+		ImageUrl:    req.ImageURL,
+		ChatId:      pendingChat.ID.String(),
+		WorkspaceId: workspaceID.String(),
 	})
+	if err != nil {
+		h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+			ID: pendingChat.ID, Status: pgtype.Text{String: "failed", Valid: true},
+		})
+		utils.ResponseWithError(w, http.StatusInternalServerError, "AI generation failed")
+		return
+	}
+	h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+		ID:      pendingChat.ID,
+		Status:  pgtype.Text{String: aiResp.Status, Valid: true},
+		Content: "Generation started",
+	})
+	utils.ResponseWithJSON(w, http.StatusAccepted, map[string]interface{}{
+		"job_id":  aiResp.JobId,
+		"chat_id": pendingChat.ID,
+		"status":  aiResp.Status,
+	})
+}
+
+
+// GenerateStatus polls the AI backend for a generation job. When the job is
+// done it stores the model and marks the chat row.
+// GET /workspaces/{id}/generate/status?job_id=...&chat_id=...
+func (h *WorkspaceHandler) GenerateStatus(w http.ResponseWriter, r *http.Request) {
+	userID, err := claimsUserID(r)
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusUnauthorized, "invalid token")
+		return
+	}
+
+	workspaceID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusBadRequest, "invalid workspace id")
+		return
+	}
+
+	existing, err := h.Q.GetWorkspaceByID(r.Context(), workspaceID)
+	if err != nil || existing.UserID != userID {
+		utils.ResponseWithError(w, http.StatusForbidden, "access denied")
+		return
+	}
+
+	jobID := r.URL.Query().Get("job_id")
+	chatID, err := uuid.Parse(r.URL.Query().Get("chat_id"))
+	if jobID == "" || err != nil {
+		utils.ResponseWithError(w, http.StatusBadRequest, "job_id and chat_id query params required")
+		return
+	}
+
+	aiResp, err := h.AI.Client.GenerateStatus(r.Context(), &aipb.GenerateStatusRequest{
+		JobId:  jobID,
+		ChatId: chatID.String(),
+	})
+	if err != nil {
+		utils.ResponseWithError(w, http.StatusInternalServerError, "AI status poll failed")
+		return
+	}
+
+	resp := map[string]interface{}{
+		"status":    aiResp.Status,
+		"model_url": aiResp.ModelUrl,
+		"chat_id":   chatID,
+	}
+
+	switch aiResp.Status {
+	case "done":
+		model, err := h.Q.CreateWorkspaceModel(r.Context(), db.CreateWorkspaceModelParams{
+			WorkspaceID: workspaceID,
+			UserID:      userID,
+			Name:        pgtype.Text{String: "AI generated model", Valid: true},
+			S3Url:       aiResp.ModelUrl,
+			Source:      "ai_generated",
+		})
+		if err == nil {
+			h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+				ID:            chatID,
+				Status:        pgtype.Text{String: "done", Valid: true},
+				Content:       "Generation complete",
+				ResultModelID: pgtype.UUID{Bytes: model.ID, Valid: true},
+			})
+			resp["model_id"] = model.ID
+		}
+	case "failed":
+		h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+			ID:      chatID,
+			Status:  pgtype.Text{String: "failed", Valid: true},
+			Content: "Generation failed",
+		})
+	}
+
+	utils.ResponseWithJSON(w, http.StatusOK, resp)
 }
 
 
@@ -505,27 +568,26 @@ func (h *WorkspaceHandler) ConceptImages(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// ── AI gRPC call (uncomment when Python AI backend is ready) ──────────────
-	// aiResp, err := h.AI.Client.ConceptImages(r.Context(), &aipb.ConceptImagesRequest{
-	//     Prompt:      req.Prompt,
-	//     WorkspaceId: workspaceID.String(),
-	//     ChatId:      pendingChat.ID.String(),
-	// })
-	// if err != nil {
-	//     utils.ResponseWithError(w, http.StatusInternalServerError, "AI service unavailable")
-	//     return
-	// }
-	// utils.ResponseWithJSON(w, http.StatusOK, map[string]interface{}{
-	//     "images":  aiResp.Images,
-	//     "chat_id": pendingChat.ID,
-	// })
-	// return
-	// ─────────────────────────────────────────────────────────────────────────
-
+	aiResp, err := h.AI.Client.ConceptImages(r.Context(), &aipb.ConceptImagesRequest{
+		Prompt:      req.Prompt,
+		WorkspaceId: workspaceID.String(),
+		ChatId:      pendingChat.ID.String(),
+	})
+	if err != nil {
+		h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+			ID: pendingChat.ID, Status: pgtype.Text{String: "failed", Valid: true},
+		})
+		utils.ResponseWithError(w, http.StatusInternalServerError, "AI service unavailable")
+		return
+	}
+	h.Q.UpdateWorkspaceChatStatus(r.Context(), db.UpdateWorkspaceChatStatusParams{
+		ID:      pendingChat.ID,
+		Status:  pgtype.Text{String: "done", Valid: true},
+		Content: req.Prompt,
+	})
 	utils.ResponseWithJSON(w, http.StatusOK, map[string]interface{}{
-		"images":  []string{},
+		"images":  aiResp.Images,
 		"chat_id": pendingChat.ID,
-		"note":    "AI backend not connected yet — stub response",
 	})
 }
 

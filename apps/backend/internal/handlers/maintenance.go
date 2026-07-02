@@ -9,17 +9,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/wakeupguruu/airix/internal/config"
 	"github.com/wakeupguruu/airix/internal/db"
+	aipb "github.com/wakeupguruu/airix/internal/pb/ai"
 	"github.com/wakeupguruu/airix/internal/utils"
 )
 
 type MaintenanceHandler struct {
 	Q  *db.Queries
 	S3 *config.S3Client
-	// AI *config.AIClient // uncomment when Python AI backend is ready
+	AI *config.AIClient
 }
 
-func NewMaintenanceHandler(q *db.Queries, s3 *config.S3Client) *MaintenanceHandler {
-	return &MaintenanceHandler{Q: q, S3: s3}
+func NewMaintenanceHandler(q *db.Queries, s3 *config.S3Client, ai *config.AIClient) *MaintenanceHandler {
+	return &MaintenanceHandler{Q: q, S3: s3, AI: ai}
 }
 
 
@@ -302,53 +303,45 @@ func (h *MaintenanceHandler) Analyse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── AI gRPC call (uncomment when Python AI backend is ready) ──────────────
-	// history, _ := h.Q.GetManagementChatsByManagementID(r.Context(), managementID)
-	// msgs := make([]*aipb.ChatMessage, 0, len(history))
-	// for _, c := range history {
-	//     msgs = append(msgs, &aipb.ChatMessage{Role: c.Role, Content: c.Content})
-	// }
-	// sensorJSON, _ := json.Marshal(management.SensorData)
-	// aiResp, err := h.AI.Client.MaintenanceAnalyse(r.Context(), &aipb.MaintenanceAnalyseRequest{
-	//     ManagementId:       managementID.String(),
-	//     VehicleType:        management.Type,
-	//     History:            msgs,
-	//     Prompt:             req.Prompt,
-	//     AttachmentText:     req.AttachmentText,
-	//     PreviousSensorData: string(sensorJSON),
-	//     ChatId:             assistantChat.ID.String(),
-	// })
-	// if err != nil {
-	//     h.Q.UpdateManagementChatStatus(r.Context(), db.UpdateManagementChatStatusParams{
-	//         ID:     assistantChat.ID,
-	//         Status: pgtype.Text{String: "failed", Valid: true},
-	//     })
-	//     utils.ResponseWithError(w, http.StatusInternalServerError, "AI analysis failed")
-	//     return
-	// }
-	// // Update chat row with AI response
-	// updated, _ := h.Q.UpdateManagementChatStatus(r.Context(), db.UpdateManagementChatStatusParams{
-	//     ID:               assistantChat.ID,
-	//     Status:           pgtype.Text{String: "done", Valid: true},
-	//     Content:          aiResp.Content,
-	//     AnalysisSnapshot: []byte(aiResp.AnalysisSnapshot),
-	// })
-	// // Also update the management record's analysis_result for latest snapshot
-	// h.Q.UpdateManagementAnalysis(r.Context(), db.UpdateManagementAnalysisParams{
-	//     ID:             managementID,
-	//     AnalysisResult: []byte(aiResp.AnalysisSnapshot),
-	// })
-	// utils.ResponseWithJSON(w, http.StatusOK, map[string]interface{}{
-	//     "user_message":      userChat,
-	//     "assistant_message": updated,
-	// })
-	// return
-	// ─────────────────────────────────────────────────────────────────────────
-
+	history, _ := h.Q.GetManagementChatsByManagementID(r.Context(), managementID)
+	msgs := make([]*aipb.ChatMessage, 0, len(history))
+	for _, c := range history {
+		msgs = append(msgs, &aipb.ChatMessage{Role: c.Role, Content: c.Content})
+	}
+	if len(msgs) > 10 {
+		msgs = msgs[len(msgs)-10:]
+	}
+	aiResp, err := h.AI.Client.MaintenanceAnalyse(r.Context(), &aipb.MaintenanceAnalyseRequest{
+		ManagementId:       managementID.String(),
+		VehicleType:        management.Type,
+		History:            msgs,
+		Prompt:             req.Prompt,
+		AttachmentText:     req.AttachmentText,
+		PreviousSensorData: string(management.SensorData),
+		ChatId:             assistantChat.ID.String(),
+	})
+	if err != nil {
+		h.Q.UpdateManagementChatStatus(r.Context(), db.UpdateManagementChatStatusParams{
+			ID:     assistantChat.ID,
+			Status: pgtype.Text{String: "failed", Valid: true},
+		})
+		utils.ResponseWithError(w, http.StatusInternalServerError, "AI analysis failed")
+		return
+	}
+	updated, _ := h.Q.UpdateManagementChatStatus(r.Context(), db.UpdateManagementChatStatusParams{
+		ID:               assistantChat.ID,
+		Status:           pgtype.Text{String: "done", Valid: true},
+		Content:          aiResp.Content,
+		AnalysisSnapshot: []byte(aiResp.AnalysisSnapshot),
+	})
+	h.Q.UpdateManagementAnalysis(r.Context(), db.UpdateManagementAnalysisParams{
+		ID:             managementID,
+		SensorData:     management.SensorData,
+		AnalysisResult: []byte(aiResp.AnalysisSnapshot),
+	})
 	utils.ResponseWithJSON(w, http.StatusOK, map[string]interface{}{
 		"user_message":      userChat,
-		"assistant_message": assistantChat,
-		"note":              "AI backend not connected yet — stub response",
+		"assistant_message": updated,
 	})
 }
 

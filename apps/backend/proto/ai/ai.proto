@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package ai;
+
+// go_package: the Go import path for this generated code
+option go_package = "github.com/wakeupguruu/airix/internal/pb/ai;aipb";
+
+
+// Shared Types
+
+
+message ChatMessage {
+  string role    = 1; 
+  string content = 2;
+}
+
+
+// 1. 3D Generation  (text-to-model and image-to-model in one RPC)
+
+message GenerateRequest {
+  string mode         = 1; // "text_to_model" | "image_to_model"
+  string prompt       = 2; // used when mode = text_to_model
+  string image_url    = 3; // used when mode = image_to_model
+  string chat_id      = 4;
+  string workspace_id = 5;
+}
+
+message GenerateResponse {
+  string job_id  = 1; // external provider job ID (Meshy / Tripo3D)
+  string status  = 2; // always "processing" on initial response
+}
+
+
+// 2. Poll generation job status
+
+message GenerateStatusRequest {
+  string job_id  = 1;
+  string chat_id = 2;
+}
+
+message GenerateStatusResponse {
+  string status    = 1; // "processing" | "done" | "failed"
+  string model_url = 2; // S3 URL of .glb file — only populated when status = "done"
+  string chat_id   = 3;
+}
+
+// 3. Concept Studio — generate 4 concept images from a text prompt
+message ConceptImagesRequest {
+  string prompt       = 1;
+  string workspace_id = 2;
+  string chat_id      = 3;
+}
+
+message ConceptImagesResponse {
+  repeated string images = 1; // 4 S3 URLs
+}
+
+// 4. Design Chat
+
+message DesignChatRequest {
+  // Last 10 messages from workspace_chats DB table (for AI memory)
+  repeated ChatMessage history = 1;
+
+  string prompt       = 2; // The user's new message
+  string scene_json   = 3; // Full 3D scene JSONB serialised as a string
+
+  string workspace_id = 4;
+  string chat_id      = 5;
+}
+
+message DesignChatResponse {
+  string type              = 1;
+  string content           = 2; 
+  string follow_up_question = 3;
+  string job_id            = 4; 
+}
+
+// 5. Maintenance Analysis — analyse extracted sensor / telemetry data
+
+message MaintenanceAnalyseRequest {
+  string management_id       = 1;
+  string vehicle_type        = 2; // "DRONE" | "AIRCRAFT" | "FIGHTER_JET" | "OTHER"
+
+
+  repeated ChatMessage history = 3;
+
+  string prompt              = 4; 
+  string attachment_text     = 5; 
+  string previous_sensor_data = 6; 
+
+  string chat_id             = 7;
+}
+
+message MaintenanceAnalyseResponse {
+  string content           = 1; // Human-readable analysis text
+  string analysis_snapshot = 2; // Full structured JSON — Go writes to management.analysis_result
+}
+
+
+// Service Definition
+
+service AIService {
+  // 3D Generation
+  rpc Generate(GenerateRequest)           returns (GenerateResponse);
+  rpc GenerateStatus(GenerateStatusRequest) returns (GenerateStatusResponse);
+
+  // Concept Studio
+  rpc ConceptImages(ConceptImagesRequest) returns (ConceptImagesResponse);
+
+  // Design workspace chat
+  rpc DesignChat(DesignChatRequest)       returns (DesignChatResponse);
+
+  // Predictive maintenance analysis
+  rpc MaintenanceAnalyse(MaintenanceAnalyseRequest) returns (MaintenanceAnalyseResponse);
+}

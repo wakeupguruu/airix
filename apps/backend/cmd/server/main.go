@@ -28,10 +28,14 @@ func main() {
 	redisClient := config.ConnectRedis()                                                                         
     defer redisClient.Close()
 
-	s3Client, err := config.ConnectS3()                                                            
-    if err != nil {                                                                                
-        log.Fatalf("failed to connect s3: %v", err)                                                
-    }  
+	s3Client, err := config.ConnectS3()
+	if err != nil {
+		log.Fatalf("failed to connect s3: %v", err)
+	}
+
+	// ── AI gRPC client (uncomment when Python AI backend is ready) ───────────
+	// aiClient := config.ConnectAI()
+	// defer aiClient.Close()
 
 	router := chi.NewRouter()
 

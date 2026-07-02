@@ -30,8 +30,17 @@ function resolveGoCache() {
 const goCache = resolveGoCache();
 console.log(`[backend] GOCACHE → ${goCache}`);
 
+// Ensure `go` and `air` (installed to GOPATH/bin) are findable even when the
+// shell that launched turbo predates the Go install.
+const sep = process.platform === "win32" ? ";" : ":";
+const extraBins = [path.join(os.homedir(), "go", "bin")];
+if (process.platform === "win32") {
+  extraBins.push("C:\\Program Files\\Go\\bin");
+}
+const PATH = [...extraBins, process.env.PATH || process.env.Path || ""].join(sep);
+
 const child = spawn("air", [], {
-  env: { ...process.env, GOCACHE: goCache },
+  env: { ...process.env, PATH, Path: PATH, GOCACHE: goCache },
   stdio: "inherit",
   shell: process.platform === "win32",
 });

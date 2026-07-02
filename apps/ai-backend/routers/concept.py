@@ -25,6 +25,30 @@ class ConceptRequest(BaseModel):
     count: Optional[int] = 4
 
 
+_pollinations_lock: asyncio.Lock = asyncio.Lock()
+
+
+async def _pollinations_fallback(prompt: str) -> str:
+    """Free keyless image API — last resort when HF token lacks inference access.
+    Serialised via lock: anonymous tier rejects concurrent requests."""
+    import random
+    from urllib.parse import quote
+
+    import httpx
+
+    async with _pollinations_lock, httpx.AsyncClient(timeout=120.0, follow_redirects=True) as client:
+        # anonymous tier rate-limits concurrent calls — retry with jittered backoff
+        for attempt in range(6):
+            url = f"https://image.pollinations.ai/prompt/{quote(prompt[:500])}?width=1024&height=1024&nologo=true&seed={random.randint(0, 10**9)}"
+            res = await client.get(url)
+            if res.status_code == 429:
+                await asyncio.sleep(5 + random.uniform(0, 4) + attempt * 2)
+                continue
+            res.raise_for_status()
+            return f"data:image/jpeg;base64,{base64.b64encode(res.content).decode()}"
+        raise RuntimeError("Pollinations rate limit — all retries exhausted.")
+
+
 async def _generate_one(prompt: str, hf_key: str) -> str:
     from huggingface_hub import AsyncInferenceClient
 
@@ -41,7 +65,8 @@ async def _generate_one(prompt: str, hf_key: str) -> str:
         except Exception as e:
             logger.warning(f"Concept model {m} failed: {e}")
 
-    raise RuntimeError("All concept image models failed.")
+    logger.warning("All HF concept models failed — falling back to Pollinations.")
+    return await _pollinations_fallback(prompt)
 
 
 @router.post("/images")
